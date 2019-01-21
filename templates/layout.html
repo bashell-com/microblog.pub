@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
 <link href="https://fonts.googleapis.com/css?family=Mali" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/BlobMoji.css">
+<link rel="stylesheet" href="/static/css/notepad.css">
 <link rel="authorization_endpoint" href="{{ config.ID }}/indieauth">
 <link rel="token_endpoint" href="{{ config.ID }}/token">
 {% if not request.args.get("older_than") and not request.args.get("previous_than") %}<link rel="canonical" href="https://{{ config.DOMAIN }}{{ request.path }}">{% endif %}
