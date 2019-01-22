@@ -6,16 +6,16 @@
 {% include "header.html" %}
 <div id="new">
 {% if thread %}
-<h3 style="padding-bottom: 30px">Replying to {{ content }}</h3>
+<h3 style="padding-bottom: 30px;padding-top: 20px;">Replying to {{ content }}</h3>
 {{ utils.display_thread(thread) }}
 {% else %}
-<h3 style="padding-bottom:20px;">New note</h3>
+<h3 style="padding-bottom:20px;padding-top: 20px;">New note</h3>
 {% endif %}
 <form action="/api/new_note" method="POST" enctype="multipart/form-data">
 <input type="hidden" name="redirect" value="/">
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 {% if reply %}<input type="hidden" name="reply" value="{{reply}}">{% endif %}
-<textarea style="width: calc(100% - 20px);" name="content" rows="10" cols="50" autofocus="autofocus">{{ content }}</textarea>
+<textarea style="width: calc(100% - 20px);" name="content" rows="5" cols="50" autofocus="autofocus">{{ content }}</textarea>
 <input style="width: calc(100% - 20px);" type="file" name="file">
 <div style="margin-top:20px; width: 100%;">
 <input style="width: 100%;" type="submit" value="post">
