@@ -31,6 +31,7 @@ from flask import jsonify as flask_jsonify
 from flask import redirect
 from flask import render_template
 from flask import request
+from flask import send_from_directory
 from flask import session
 from flask import url_for
 from flask_wtf.csrf import CSRFProtect
@@ -2212,4 +2213,13 @@ def rss_feed():
     return Response(
         response=activitypub.gen_feed().rss_str(),
         headers={"Content-Type": "application/rss+xml"},
+    )
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(
+        directory=os.path.join(app.root_path, 'static'),
+        filename='favicon.ico',
+        mimetype='image/vnd.microsoft.icon'
     )

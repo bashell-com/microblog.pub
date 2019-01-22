@@ -3,6 +3,6 @@ key_*.pem
 data/*
 config/*
 static/media/*
-
+static/favicon.ico
 .mypy_cache/
 __pycache__/
