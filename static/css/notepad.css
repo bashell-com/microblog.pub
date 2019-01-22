@@ -9,17 +9,17 @@ body {
     background: #f6f6f6;
     box-shadow: 0 1px 4px hsla(0,0%,0%,.25);
     position: relative;
-    background-image: -webkit-radial-gradient(#e6e6e6 21%, transparent 21%),
-                      -webkit-radial-gradient(hsla(0,0%,0%,.25) 21%, transparent 26%),
-                      -webkit-linear-gradient(top, hsla(0,0%,0%,0) 0%, hsla(0,0%,0%,0) 95%,
+    background-image: radial-gradient(antiquewhite, transparent 21%),
+                      radial-gradient(antiquewhite 10%, transparent 12%),
+                      linear-gradient(top, hsla(0,0%,0%,0) 0%, hsla(0,0%,0%,0) 95%,
                                                    hsla(180,25%,50%,.1) 95%, hsla(180,25%,50%,.1) 100%);
-    background-image: -moz-radial-gradient(#e6e6e6 21%, transparent 21%),
-                      -moz-radial-gradient(#e6e6e6 10%, transparent 12%),
+    background-image: -moz-radial-gradient(antiquewhite 21%, transparent 21%),
+                      -moz-radial-gradient(antiquewhite 10%, transparent 12%),
                       -moz-linear-gradient(top, hsla(0,0%,0%,0) 0%, hsla(0,0%,0%,0) 95%,
                                                    hsla(180,25%,50%,.1) 95%, hsla(180,25%,50%,.1) 100%);
-    background-image: radial-gradient(#e6e6e6 21%, transparent 21%),
-                      radial-gradient(#e6e6e6 10%, transparent 12%),
-                      linear-gradient(top, hsla(0,0%,0%,0) 0%, hsla(0,0%,0%,0) 95%,
+    background-image: -webkit-radial-gradient(antiquewhite 21%, transparent 21%),
+                      -webkit-radial-gradient(hsla(0,0%,0%,.25) 21%, transparent 26%),
+                      -webkit-linear-gradient(top, hsla(0,0%,0%,0) 0%, hsla(0,0%,0%,0) 95%,
                                                    hsla(180,25%,50%,.1) 95%, hsla(180,25%,50%,.1) 100%);
     background-position: 2px 6px, 2px 5px, 50% 18px;
     background-repeat: repeat-y, repeat-y, repeat;
