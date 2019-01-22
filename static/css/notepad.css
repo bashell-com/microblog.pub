@@ -21,7 +21,7 @@ body {
                       radial-gradient(#e6e6e6 10%, transparent 12%),
                       linear-gradient(top, hsla(0,0%,0%,0) 0%, hsla(0,0%,0%,0) 95%,
                                                    hsla(180,25%,50%,.1) 95%, hsla(180,25%,50%,.1) 100%);
-    background-position: 6px 6px, 6px 5px, 50% 18px;
+    background-position: 2px 6px, 2px 5px, 50% 18px;
     background-repeat: repeat-y, repeat-y, repeat;
     background-size: 48px 48px, 48px 48px, 24px 24px;
 }
@@ -30,7 +30,7 @@ body {
     border-right: 1px solid hsla(0,75%,50%,.2);
     bottom: 0;
     content: '';
-    left: 58px;
+    left: 50px;
     position: absolute;
     top: 0;
     width: 2px;
