@@ -277,11 +277,15 @@ def clean(html):
     return clean_html(html)
 
 
-@app.template_filter()
-def emojize(html):
+def flexmoji(html):
     html = emoji.emojize(html, use_aliases=True)
     html = emoji.emojize(html, use_aliases=True, delimiters=(':blob_', ':'))
     return html
+
+
+@app.template_filter()
+def emojize(html):
+    return flexmoji(html)
 
 
 @app.template_filter()
@@ -1789,6 +1793,7 @@ def api_new_note():
         pass
 
     content, tags = parse_markdown(source)
+    content = flexmoji(content)
     to = request.args.get("to")
     cc = [ID + "/followers"]
 
