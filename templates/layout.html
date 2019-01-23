@@ -5,6 +5,13 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
   <title>{% block title %}{{ config.NAME }}{% endblock %}'s microblog</title>
+  <link rel="manifest" href="/static/pwa/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="{{ config.NAME }}'s microblog">
+  <link rel="apple-touch-icon" href="/static/pwa/icon-152.png">
+  <meta name="msapplication-TileImage" content="/static/pwa/icon-144.png">
+  <meta name="msapplication-TileColor" content="#FAEBD7">
   <link rel="shortcut icon" href="/static/favicon.ico">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css"
         integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w"

@@ -1,0 +1,30 @@
+{
+  "name": "microblog.pub",
+  "short_name": "μblog",
+  "icons": [{
+    "src": "/static/pwa/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    }, {
+      "src": "/static/pwa/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    }, {
+      "src": "/static/pwa/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    }, {
+      "src": "/static/pwa/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }, {
+      "src": "/static/pwa/icon-256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "antiquewhite",
+  "theme_color": "#1d781d"
+}
+
