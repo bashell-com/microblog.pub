@@ -56,7 +56,7 @@
       {% endif %}
       {% if obj | has_type('Video') %}
         <div class="note-video">
-          <video controls preload="metadata"  src="{{ obj.url | get_video_link }}" width="100%"></video>
+          <video controls preload="metadata"  src="{{ obj.url | get_video_link }}"></video>
         </div>
       {% endif %}
         <div class="note-container{% if perma %} perma{%endif%} p-name e-content">
@@ -79,7 +79,7 @@
             </a>
           {% elif (a.mediaType and a.mediaType.startswith("video/")) %}
             <li>
-              <video controls preload="metadata"  src="{{ a.url }}" width="100%"></video>
+              <video controls preload="metadata"  src="{{ a.url }}"></video>
             </li>
           {% else %}
             <li>
