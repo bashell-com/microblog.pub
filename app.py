@@ -18,6 +18,7 @@ from urllib.parse import urlencode
 from urllib.parse import urlparse
 
 import bleach
+import emoji
 import mf2py
 import pymongo
 import timeago
@@ -274,6 +275,13 @@ def is_from_outbox(t):
 @app.template_filter()
 def clean(html):
     return clean_html(html)
+
+
+@app.template_filter()
+def emojize(html):
+    html = emoji.emojize(html, use_aliases=True)
+    html = emoji.emojize(html, use_aliases=True, delimiters=(':blob_', ':'))
+    return html
 
 
 @app.template_filter()

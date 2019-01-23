@@ -19,6 +19,10 @@ RUN apk add gcc g++ python3-dev musl-dev libffi-dev openssl-dev libxml2-dev libx
             libjpeg-turbo-dev openjpeg-dev tiff-dev lcms2-dev freetype-dev libwebp-dev zlib-dev \
  && rm -rf /var/cache/*/*
 
+ADD requirements2.txt /opt/ublog/requirements2.txt
+
+RUN /opt/ublog/bin/python -O -m pip install --compile --install-option=-O1 -r /opt/ublog/requirements2.txt
+
 ADD . /app
 
 WORKDIR /app
