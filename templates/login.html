@@ -4,8 +4,12 @@
 {% block headers %}
 <style>
 #login-container {
-height: 90%;
-display: grid;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+text-align: center;
+min-height: calc(100vh - 180px);
 }
 #login-form {
 margin:auto;
@@ -16,7 +20,7 @@ display:inline;
 {% block content %}
 <div id="login-container">
 
-<form id="login-form" method="POST" style="margin-top:50%;">
+<form id="login-form" method="POST">
 	 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 	<input type="password" name="pass" placeholder="password">
 	{% if u2f_enabled %}
