@@ -3,7 +3,7 @@
     <a class="actor-box" href="{{follower | url_or_id | get_url }}" style="clear:both;">
       <span style="float:left;padding-right:15px;">
       {% if not follower.icon %}
-        <img class="actor-icon" src="/static/nopic.png" style="width:{{ size }}px">
+        <img class="actor-icon" src="{{ config.CDN_URL }}/static/nopic.png" style="width:{{ size }}px">
       {% else %}
         <img class="actor-icon" src="{{ follower.icon.url | get_actor_icon_url(size) }}" style="width:{{ size }}px;">
       {% endif %}
@@ -27,7 +27,7 @@
       <div class="h-card p-author">
         <a class="u-url u-uid no-hover" href="{{ actor | url_or_id | get_url }}">
           <img class="u-photo"
-               src="{% if not actor.icon %}/static/nopic.png{% else %}{{ actor.icon.url | get_actor_icon_url(50) }}{% endif %}">
+               src="{% if not actor.icon %}{{ config.CDN_URL }}/static/nopic.png{% else %}{{ actor.icon.url | get_actor_icon_url(50) }}{% endif %}">
         </a>
         <data class="p-name" value="{{ actor.name or actor.preferredUsername }}"></data>
       </div>

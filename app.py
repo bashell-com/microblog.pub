@@ -77,6 +77,7 @@ from config import PASS
 from config import USERNAME
 from config import VERSION
 from config import TIMEZONE
+from config import CDN_URL
 from config import _drop_db
 from utils.key import get_secret_key
 from utils.lookup import lookup
@@ -206,13 +207,13 @@ def _get_file_url(url, size, kind):
     k = (kind, url, size)
     cached = _GRIDFS_CACHE.get(k)
     if cached:
-        return cached
+        return CDN_URL + cached if cached.startswith('/') else cached
 
     doc = MEDIA_CACHE.get_file(url, size, kind)
     if doc:
         u = f"/media/{str(doc._id)}"
         _GRIDFS_CACHE[k] = u
-        return u
+        return CDN_URL + u if u.startswith('/') else u
 
     # MEDIA_CACHE.cache(url, kind)
     app.logger.error(f"cache not available for {url}/{size}/{kind}")

@@ -82,6 +82,7 @@ with open(os.path.join(KEY_DIR, "me.yml")) as f:
     THEME_STYLE = ThemeStyle(theme_conf.get("style", DEFAULT_THEME_STYLE))
     THEME_COLOR = theme_conf.get("color", DEFAULT_THEME_PRIMARY_COLOR[THEME_STYLE])
     TIMEZONE = int(conf.get("timezone_hours", 0))
+    CDN_URL = conf.get("cdn_url", "")
 
 
 SASS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sass")
