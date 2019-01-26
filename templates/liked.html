@@ -2,34 +2,31 @@
 {% import 'utils.html' as utils %}
 {% block content %}
 <div class="h-feed" id="container">
-<data class="p-name" value="{{config.USERNAME}} liked"></data>
-
+	<data class="p-name" value="{{config.USERNAME}} liked"></data>
 {% include "header.html" %}
-
-<div id="notes">
-	{% for item in liked %}
-    {% if session.logged_in %}
-<div>
-<span class="bar-item-no-hover">You liked</span>
-<form action="/api/undo" class="action-form"  method="POST">
-<input type="hidden" name="redirect" value="/liked"/>
-<input type="hidden" name="id" value="{{ item.remote_id }}"/>
-<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-<button type="submit" class="bar-item">unlike</button>
-</form>
-        </div>
-  
-    {% endif %}
-    {% if item.meta.object %}
-    {{ utils.display_note(item.meta.object, meta={'actor': item.meta.object_actor}) }}
-    {% endif %}
-	{% endfor %}
-
-    {{ utils.display_pagination(older_than, newer_than) }}
-</div>
-
+	<div id="notes">
+{% for item in liked %}
+	{% if session.logged_in %}
+		<div>
+			<span class="bar-item-no-hover">You liked</span>
+			<form action="/api/undo" class="action-form" method="POST">
+				<input type="hidden" name="redirect" value="/liked" />
+				<input type="hidden" name="id" value="{{ item.remote_id }}" />
+				<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+				<button type="submit" class="bar-item">unlike</button>
+			</form>
+		</div>
+	{% endif %}
+	{% if item.meta.object %}
+		{{ utils.display_note(item.meta.object, meta={'actor':item.meta.object_actor}) }}
+	{% endif %}
+{% endfor %}
+	{{ utils.display_pagination(older_than, newer_than) }}
+	</div>
 </div>
 {% endblock %}
 {% block links %}
 <link rel="alternate" href="{{ config.BASE_URL }}/liked" type="application/activity+json">
-{{ utils.display_pagination_links(older_than, newer_than) }}{% endblock %}
+{{ utils.display_pagination_links(older_than, newer_than) }}
+{% endblock %}
+
