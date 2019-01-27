@@ -167,7 +167,7 @@ def url_or_id(d):
 
 @blueprint.app_template_filter()
 def get_url(u):
-    print(f"GET_URL({u!r})")
+    current_app.logger.debug(f"GET_URL({u!r})")
     if isinstance(u, list):
         for l in u:
             if l.get("mimeType") == "text/html":
@@ -188,7 +188,7 @@ def get_actor(url):
         url = url[0]
     if isinstance(url, dict):
         url = url.get("id")
-    print(f"GET_ACTOR {url}")
+    current_app.logger.debug(f"GET_ACTOR {url}")
     try:
         return get_backend().fetch_iri(url)
     except (ActivityNotFoundError, ActivityGoneError):

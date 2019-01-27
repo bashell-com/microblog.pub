@@ -334,11 +334,11 @@ def admin_login():
         if pwd and verify_pass(pwd):
             if devices:
                 resp = json.loads(request.form.get("resp"))
-                print(resp)
+                app.logger.debug(resp)
                 try:
                     u2f.complete_authentication(session["challenge"], resp)
                 except ValueError as exc:
-                    print("failed", exc)
+                    app.logger.debug("failed", exc)
                     abort(401)
                     return
                 finally:
@@ -555,7 +555,7 @@ def with_replies():
 
 def _build_thread(data, include_children=True):
     data["_requested"] = True
-    print(data)
+    app.logger.debug(data)
     root_id = data["meta"].get("thread_root_parent", data["activity"]["object"]["id"])
 
     query = {
@@ -833,7 +833,7 @@ def outbox():
         abort(401)
 
     data = request.get_json(force=True)
-    print(data)
+    app.logger.debug(data)
     activity = ap.parse_activity(data)
     activity_id = tasks.post_to_outbox(activity)
 
@@ -1035,7 +1035,7 @@ def admin_lookup():
                     actor=data.get_actor().to_dict(),
                 )
 
-        print(data)
+        app.logger.debug(data)
     return render_template(
         "lookup.html", data=data, meta=meta, url=request.form.get("url")
     )
@@ -1070,7 +1070,7 @@ def admin_new():
     reply_id = None
     content = ""
     thread = []
-    print(request.args)
+    app.logger.debug(request.args)
     if request.args.get("reply"):
         data = DB.activities.find_one({"activity.object.id": request.args.get("reply")})
         if data:
@@ -1693,7 +1693,7 @@ def get_client_id_data(url):
     for item in data["items"]:
         if "h-x-app" in item["type"] or "h-app" in item["type"]:
             props = item.get("properties", {})
-            print(props)
+            app.logger.debug(props)
             return dict(
                 logo=_get_prop(props, "logo"),
                 name=_get_prop(props, "name"),
@@ -1716,7 +1716,7 @@ def indieauth_flow():
 
     code = binascii.hexlify(os.urandom(8)).decode("utf-8")
     auth.update(code=code, verified=False)
-    print(auth)
+    app.logger.debug(auth)
     if not auth["redirect_uri"]:
         abort(500)
 
@@ -1741,7 +1741,7 @@ def indieauth_endpoint():
         response_type = request.args.get("response_type", "id")
         scope = request.args.get("scope", "").split()
 
-        print("STATE", state)
+        app.logger.debug("STATE", state)
         return render_template(
             "indieauth_flow.html",
             client=get_client_id_data(client_id),
@@ -1767,8 +1767,8 @@ def indieauth_endpoint():
         {"$set": {"verified": True}},
         sort=[("_id", pymongo.DESCENDING)],
     )
-    print(auth)
-    print(code, redirect_uri, client_id)
+    app.logger.debug(auth)
+    app.logger.debug(code, redirect_uri, client_id)
 
     if not auth:
         abort(403)
@@ -1778,7 +1778,7 @@ def indieauth_endpoint():
     me = auth["me"]
     state = auth["state"]
     scope = " ".join(auth["scope"])
-    print("STATE", state)
+    app.logger.debug("STATE", state)
     return build_auth_resp({"me": me, "state": state, "scope": scope})
 
 

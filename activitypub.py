@@ -1,8 +1,8 @@
-import logging
-import os
-import json
 from datetime import datetime
 from enum import Enum
+import json
+import logging
+import os
 from typing import Any
 from typing import Dict
 from typing import List
@@ -25,11 +25,10 @@ from config import DB
 from config import EXTRA_INBOXES
 from config import ID
 from config import ME
-from config import USER_AGENT
 from config import USERNAME
+from config import USER_AGENT
 
 logger = logging.getLogger(__name__)
-
 
 ACTORS_CACHE = LRUCache(maxsize=256)
 
@@ -147,7 +146,7 @@ class MicroblogPubBackend(Backend):
         return [doc["activity"]["object"] for doc in DB.activities.find(q)]
 
     def parse_collection(
-        self, payload: Optional[Dict[str, Any]] = None, url: Optional[str] = None
+        self, payload: Optional[Dict[str, Any]]=None, url: Optional[str]=None
     ) -> List[str]:
         """Resolve/fetch a `Collection`/`OrderedCollection`."""
         # Resolve internal collections via MongoDB directly
@@ -263,7 +262,7 @@ class MicroblogPubBackend(Backend):
         # Update the meta counter if the object is published by the server
         DB.activities.update_one(
             {"box": Box.OUTBOX.value, "activity.object.id": obj.id},
-            {"$inc": {"meta.count_like": -1}},
+            {"$inc": {"meta.count_like":-1}},
         )
         DB.activities.update_one({"remote_id": like.id}, {"$set": {"meta.undo": True}})
 
@@ -280,7 +279,7 @@ class MicroblogPubBackend(Backend):
         obj = like.get_object()
         DB.activities.update_one(
             {"activity.object.id": obj.id},
-            {"$inc": {"meta.count_like": -1}, "$set": {"meta.liked": False}},
+            {"$inc": {"meta.count_like":-1}, "$set": {"meta.liked": False}},
         )
         DB.activities.update_one({"remote_id": like.id}, {"$set": {"meta.undo": True}})
 
@@ -314,7 +313,7 @@ class MicroblogPubBackend(Backend):
         obj = announce.get_object()
         # Update the meta counter if the object is published by the server
         DB.activities.update_one(
-            {"activity.object.id": obj.id}, {"$inc": {"meta.count_boost": -1}}
+            {"activity.object.id": obj.id}, {"$inc": {"meta.count_boost":-1}}
         )
         DB.activities.update_one(
             {"remote_id": announce.id}, {"$set": {"meta.undo": True}}
@@ -427,7 +426,6 @@ class MicroblogPubBackend(Backend):
         if len(update["$unset"]) == 0:
             del (update["$unset"])
 
-        print(f"updating note from outbox {obj!r} {update}")
         logger.info(f"updating note from outbox {obj!r} {update}")
         DB.activities.update_one({"activity.object.id": obj["id"]}, update)
         # FIXME(tsileo): should send an Update (but not a partial one, to all the note's recipients
@@ -450,7 +448,7 @@ class MicroblogPubBackend(Backend):
 
         DB.activities.update_one(
             {"activity.object.id": in_reply_to},
-            {"$inc": {"meta.count_reply": -1, "meta.count_direct_reply": -1}},
+            {"$inc": {"meta.count_reply":-1, "meta.count_direct_reply":-1}},
         )
 
     @ensure_it_is_me
@@ -552,8 +550,8 @@ def json_feed(path: str) -> Dict[str, Any]:
         "version": "https://jsonfeed.org/version/1",
         "user_comment": (
             "This is a microblog feed. You can add this to your feed reader using the following URL: "
-            + ID
-            + path
+            +ID
+            +path
         ),
         "title": USERNAME,
         "home_page_url": ID,
@@ -568,7 +566,7 @@ def json_feed(path: str) -> Dict[str, Any]:
 
 
 def build_inbox_json_feed(
-    path: str, request_cursor: Optional[str] = None
+    path: str, request_cursor: Optional[str]=None
 ) -> Dict[str, Any]:
     """Build a JSON feed from the inbox activities."""
     data = []
