@@ -1,17 +1,17 @@
+from datetime import datetime
+from enum import Enum
 import mimetypes
 import os
 import subprocess
-from datetime import datetime
-from enum import Enum
 
-import requests
-import sass
-import yaml
 from itsdangerous import JSONWebSignatureSerializer
 from little_boxes import strtobool
 from little_boxes.activitypub import DEFAULT_CTX
 from pymongo import MongoClient
 import pymongo
+import requests
+import sass
+import yaml
 
 from utils.key import KEY_DIR
 from utils.key import get_key
@@ -42,14 +42,16 @@ try:
 except ModuleNotFoundError:
     custom_cache_purge_hook = noop
 
-try:
+if os.path.isdir('.git'):
     VERSION = (
         subprocess.check_output(["git", "describe", "--always"]).split()[0].decode("utf-8")
     )
-except:
+elif os.path.isdir('.hg'):
     VERSION = (
         subprocess.check_output(["hg", "id", "-i"]).split()[0].decode("utf-8")
     )
+else:
+    VERSION = "-"
 
 DEBUG_MODE = strtobool(os.getenv("MICROBLOGPUB_DEBUG", "false"))
 
@@ -59,7 +61,6 @@ HEADERS = [
     'application/ld+json; profile="https://www.w3.org/ns/activitystreams"',
     "application/ld+json",
 ]
-
 
 with open(os.path.join(KEY_DIR, "me.yml")) as f:
     conf = yaml.load(f)
@@ -84,7 +85,6 @@ with open(os.path.join(KEY_DIR, "me.yml")) as f:
     TIMEZONE = int(conf.get("timezone_hours", 0))
     CDN_URL = conf.get("cdn_url", "")
 
-
 SASS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sass")
 theme_css = f"$primary-color: {THEME_COLOR};\n"
 with open(os.path.join(SASS_DIR, f"{THEME_STYLE.value}.scss")) as f:
@@ -93,7 +93,6 @@ with open(os.path.join(SASS_DIR, f"{THEME_STYLE.value}.scss")) as f:
 with open(os.path.join(SASS_DIR, "base_theme.scss")) as f:
     raw_css = theme_css + f.read()
     CSS = sass.compile(string=raw_css, output_style="compressed")
-
 
 USER_AGENT = (
     f"{requests.utils.default_user_agent()} (microblog.pub/{VERSION}; +{BASE_URL})"
@@ -117,7 +116,7 @@ def create_indexes():
         ("meta.deleted", pymongo.ASCENDING),
     ])
     DB.cache2.create_index([("path", pymongo.ASCENDING), ("type", pymongo.ASCENDING), ("arg", pymongo.ASCENDING)])
-    DB.cache2.create_index("date", expireAfterSeconds=3600*12)
+    DB.cache2.create_index("date", expireAfterSeconds=3600 * 12)
 
     # Index for the block query
     DB.activities.create_index(
@@ -157,15 +156,14 @@ def _drop_db():
 
 KEY = get_key(ID, USERNAME, DOMAIN)
 
-
 JWT_SECRET = get_secret_key("jwt")
 JWT = JSONWebSignatureSerializer(JWT_SECRET)
 
 
 def _admin_jwt_token() -> str:
-    return JWT.dumps(  # type: ignore
+    return JWT.dumps(# type: ignore
         {"me": "ADMIN", "ts": datetime.now().timestamp()}
-    ).decode(  # type: ignore
+    ).decode(# type: ignore
         "utf-8"
     )
 

@@ -1,34 +1,24 @@
 import binascii
+from datetime import datetime
+from datetime import timezone
+from functools import wraps
+from io import BytesIO
 import json
 import logging
 import mimetypes
 import os
 import traceback
-import urllib
-from datetime import datetime
-from datetime import timedelta
-from datetime import timezone
-from functools import wraps
-from io import BytesIO
 from typing import Any
 from typing import Dict
-from typing import Optional
-from typing import Tuple
 from urllib.parse import urlencode
 from urllib.parse import urlparse
 
-import bleach
-import emoji
-import mf2py
-import pymongo
-import timeago
 from bson.objectid import ObjectId
-from dateutil import parser
 from flask import Flask
-from flask import make_response
 from flask import Response
 from flask import abort
 from flask import jsonify as flask_jsonify
+from flask import make_response
 from flask import redirect
 from flask import render_template
 from flask import request
@@ -36,7 +26,6 @@ from flask import send_from_directory
 from flask import session
 from flask import url_for
 from flask_wtf.csrf import CSRFProtect
-from html2text import html2text
 from itsdangerous import BadSignature
 from little_boxes import activitypub as ap
 from little_boxes.activitypub import ActivityType
@@ -52,15 +41,15 @@ from little_boxes.httpsig import HTTPSigAuth
 from little_boxes.httpsig import verify_request
 from little_boxes.webfinger import get_actor_url
 from little_boxes.webfinger import get_remote_follow_template
+import mf2py
 from passlib.hash import bcrypt
+import pymongo
 from u2flib_server import u2f
 from werkzeug.utils import secure_filename
 
-import activitypub
-import config
-import tasks
 from activitypub import Box
 from activitypub import embed_collection
+import activitypub
 from config import ADMIN_API_KEY
 from config import BASE_URL
 from config import DB
@@ -76,9 +65,11 @@ from config import MEDIA_CACHE
 from config import PASS
 from config import USERNAME
 from config import VERSION
-from config import TIMEZONE
-from config import CDN_URL
 from config import _drop_db
+import config
+import filters
+import tasks
+from utils.emoji import flexmoji
 from utils.key import get_secret_key
 from utils.lookup import lookup
 from utils.media import Kind
@@ -89,6 +80,7 @@ ap.use_backend(back)
 MY_PERSON = ap.Person(**ME)
 
 app = Flask(__name__)
+app.register_blueprint(filters.blueprint)
 app.secret_key = get_secret_key("flask")
 app.config.update(WTF_CSRF_CHECK_DEFAULT=False)
 csrf = CSRFProtect(app)
@@ -165,254 +157,11 @@ def set_x_powered_by(response):
     return response
 
 
-# HTML/templates helper
-ALLOWED_TAGS = [
-    "a",
-    "abbr",
-    "acronym",
-    "b",
-    "br",
-    "blockquote",
-    "code",
-    "pre",
-    "em",
-    "i",
-    "li",
-    "ol",
-    "strong",
-    "ul",
-    "span",
-    "div",
-    "p",
-    "h1",
-    "h2",
-    "h3",
-    "h4",
-    "h5",
-    "h6",
-]
-
-
-def clean_html(html):
-    try:
-        return bleach.clean(html, tags=ALLOWED_TAGS)
-    except:
-        return ""
-
-
-_GRIDFS_CACHE: Dict[Tuple[Kind, str, Optional[int]], str] = {}
-
-
-def _get_file_url(url, size, kind):
-    k = (kind, url, size)
-    cached = _GRIDFS_CACHE.get(k)
-    if cached:
-        return CDN_URL + cached if cached.startswith('/') else cached
-
-    doc = MEDIA_CACHE.get_file(url, size, kind)
-    if doc:
-        u = f"/media/{str(doc._id)}"
-        _GRIDFS_CACHE[k] = u
-        return CDN_URL + u if u.startswith('/') else u
-
-    # MEDIA_CACHE.cache(url, kind)
-    app.logger.error(f"cache not available for {url}/{size}/{kind}")
-    return url
-
-
-@app.template_filter()
-def remove_mongo_id(dat):
-    if isinstance(dat, list):
-        return [remove_mongo_id(item) for item in dat]
-    if "_id" in dat:
-        dat["_id"] = str(dat["_id"])
-    for k, v in dat.items():
-        if isinstance(v, dict):
-            dat[k] = remove_mongo_id(dat[k])
-    return dat
-
-
-@app.template_filter()
-def get_video_link(data):
-    for link in data:
-        if link.get("mimeType", "").startswith("video/"):
-            return link.get("href")
-    return None
-
-
-@app.template_filter()
-def get_actor_icon_url(url, size):
-    return _get_file_url(url, size, Kind.ACTOR_ICON)
-
-
-@app.template_filter()
-def get_attachment_url(url, size):
-    return _get_file_url(url, size, Kind.ATTACHMENT)
-
-
-@app.template_filter()
-def get_og_image_url(url, size=100):
-    try:
-        return _get_file_url(url, size, Kind.OG_IMAGE)
-    except Exception:
-        return ""
-
-
-@app.template_filter()
-def permalink_id(val):
-    return str(hash(val))
-
-
-@app.template_filter()
-def quote_plus(t):
-    return urllib.parse.quote_plus(t)
-
-
-@app.template_filter()
-def is_from_outbox(t):
-    return t.startswith(ID)
-
-
-@app.template_filter()
-def clean(html):
-    return clean_html(html)
-
-
-def flexmoji(html):
-    html = emoji.emojize(html, use_aliases=True)
-    html = emoji.emojize(html, use_aliases=True, delimiters=(':blob_', ':'))
-    html = emoji.emojize(html, use_aliases=True, delimiters=(':blob', ':'))
-    return html
-
-
-@app.template_filter()
-def emojize(html):
-    return flexmoji(html)
-
-
-@app.template_filter()
-def html2plaintext(body):
-    return html2text(body)
-
-
-@app.template_filter()
-def domain(url):
-    return urlparse(url).netloc
-
-
-@app.template_filter()
-def url_or_id(d):
-    if isinstance(d, dict):
-        if ("url" in d) and isinstance(d["url"], str):
-            return d["url"]
-        else:
-            return d["id"]
-    return ""
-
-
-@app.template_filter()
-def get_url(u):
-    print(f"GET_URL({u!r})")
-    if isinstance(u, list):
-        for l in u:
-            if l.get("mimeType") == "text/html":
-                u = l
-    if isinstance(u, dict):
-        return u["href"]
-    elif isinstance(u, str):
-        return u
-    else:
-        return u
-
-
-@app.template_filter()
-def get_actor(url):
-    if not url:
-        return None
-    if isinstance(url, list):
-        url = url[0]
-    if isinstance(url, dict):
-        url = url.get("id")
-    print(f"GET_ACTOR {url}")
-    try:
-        return get_backend().fetch_iri(url)
-    except (ActivityNotFoundError, ActivityGoneError):
-        return f"Deleted<{url}>"
-    except Exception as exc:
-        return f"Error<{url}/{exc!r}>"
-
-
-@app.template_filter()
-def format_time(val):
-    if val:
-        dt = parser.parse(val)
-        tz = timedelta(hours=TIMEZONE)
-        if TIMEZONE == 0:
-            tz_name = " UTC"
-        elif TIMEZONE>0:
-            tz_name = f" GMT+{TIMEZONE}"
-        else:
-            tz_name = f" GMT{TIMEZONE}"
-        return datetime.strftime(dt + tz, "%b %d, %Y, %H:%M:%S") + tz_name
-    return val
-
-
-@app.template_filter()
-def format_timeago(val):
-    if val:
-        dt = parser.parse(val)
-        return timeago.format(dt, datetime.now(timezone.utc))
-    return val
-
-
-@app.template_filter()
-def has_type(doc, _types):
-    for _type in _to_list(_types):
-        if _type in _to_list(doc["type"]):
-            return True
-    return False
-
-
-@app.template_filter()
-def has_actor_type(doc):
-    for t in ap.ACTOR_TYPES:
-        if has_type(doc, t.value):
-            return True
-    return False
-
-
-def _is_img(filename):
-    filename = filename.lower()
-    if (
-        filename.endswith(".png")
-        or filename.endswith(".jpg")
-        or filename.endswith(".jpeg")
-        or filename.endswith(".gif")
-        or filename.endswith(".svg")
-    ):
-        return True
-    return False
-
-
-@app.template_filter()
-def not_only_imgs(attachment):
-    for a in attachment:
-        if isinstance(a, dict) and not _is_img(a["url"]):
-            return True
-        if isinstance(a, str) and not _is_img(a):
-            return True
-    return False
-
-
-@app.template_filter()
-def is_img(filename):
-    return _is_img(filename)
-
-
 def add_response_headers(headers={}):
     """This decorator adds the headers passed in to the response"""
 
     def decorator(f):
+
         @wraps(f)
         def decorated_function(*args, **kwargs):
             resp = make_response(f(*args, **kwargs))
@@ -432,6 +181,7 @@ def noindex(f):
 
 
 def login_required(f):
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get("logged_in"):
@@ -460,6 +210,7 @@ def _api_required():
 
 
 def api_required(f):
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
         try:
@@ -514,7 +265,6 @@ def handle_activitypub_error(error):
     response.status_code = error.status_code
     return response
 
-
 # @app.errorhandler(Exception)
 # def handle_other_error(error):
 #    logger.error(
@@ -524,8 +274,8 @@ def handle_activitypub_error(error):
 #    response.status_code = 500
 #    return response
 
-
 # App routes
+
 
 ROBOTS_TXT = """User-agent: *
 Disallow: /login
@@ -567,7 +317,6 @@ def serve_uploads(oid, fname):
     resp.headers.set("Cache-Control", "public,max-age=31536000,immutable")
     resp.headers.set("Content-Encoding", "gzip")
     return resp
-
 
 #######
 # Login
@@ -861,6 +610,7 @@ def _get_cached(type_="html", arg=None):
             app.logger.info("from cache")
             return cached['response_data']
     return None
+
 
 def _cache(resp, type_="html", arg=None):
     if not CACHING:
@@ -1183,7 +933,7 @@ def remove_context(activity: Dict[str, Any]) -> Dict[str, Any]:
     return activity
 
 
-def activity_from_doc(raw_doc: Dict[str, Any], embed: bool = False) -> Dict[str, Any]:
+def activity_from_doc(raw_doc: Dict[str, Any], embed: bool=False) -> Dict[str, Any]:
     raw_doc = add_extra_collection(raw_doc)
     activity = clean_activity(raw_doc["activity"])
     if embed:
@@ -1556,7 +1306,7 @@ def _user_api_arg(key: str, **kwargs):
     return oid
 
 
-def _user_api_get_note(from_outbox: bool = False):
+def _user_api_get_note(from_outbox: bool=False):
     oid = _user_api_arg("id")
     app.logger.info(f"fetching {oid}")
     try:
@@ -2046,7 +1796,6 @@ def liked():
             col_name="liked",
         )
     )
-
 
 #######
 # IndieAuth
