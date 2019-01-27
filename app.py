@@ -68,11 +68,12 @@ from config import VERSION
 from config import _drop_db
 import config
 import filters
+import migrations
 import tasks
 from utils.emoji import flexmoji
 from utils.key import get_secret_key
+from utils.login import login_required
 from utils.lookup import lookup
-from utils.media import Kind
 
 back = activitypub.MicroblogPubBackend()
 ap.use_backend(back)
@@ -81,6 +82,7 @@ MY_PERSON = ap.Person(**ME)
 
 app = Flask(__name__)
 app.register_blueprint(filters.blueprint)
+app.register_blueprint(migrations.blueprint)
 app.secret_key = get_secret_key("flask")
 app.config.update(WTF_CSRF_CHECK_DEFAULT=False)
 csrf = CSRFProtect(app)
@@ -180,17 +182,6 @@ def noindex(f):
     return add_response_headers({"X-Robots-Tag": "noindex, nofollow"})(f)
 
 
-def login_required(f):
-
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get("logged_in"):
-            return redirect(url_for("admin_login", next=request.url))
-        return f(*args, **kwargs)
-
-    return decorated_function
-
-
 def _api_required():
     if session.get("logged_in"):
         if request.method not in ["GET", "HEAD"]:
@@ -274,7 +265,7 @@ def handle_activitypub_error(error):
 #    response.status_code = 500
 #    return response
 
-# App routes
+# App migrations
 
 
 ROBOTS_TXT = """User-agent: *
@@ -426,138 +417,11 @@ def u2f_register():
 
 
 #######
-# Activity pub routes
+# Activity pub migrations
 @app.route("/drop_cache")
 @login_required
 def drop_cache():
     DB.actors.drop()
-    return "Done"
-
-
-@app.route("/migration1_step1")
-@login_required
-def tmp_migrate():
-    for activity in DB.outbox.find():
-        activity["box"] = Box.OUTBOX.value
-        DB.activities.insert_one(activity)
-    for activity in DB.inbox.find():
-        activity["box"] = Box.INBOX.value
-        DB.activities.insert_one(activity)
-    for activity in DB.replies.find():
-        activity["box"] = Box.REPLIES.value
-        DB.activities.insert_one(activity)
-    return "Done"
-
-
-@app.route("/migration1_step2")
-@login_required
-def tmp_migrate2():
-    # Remove buggy OStatus announce
-    DB.activities.remove(
-        {"activity.object": {"$regex": f"^tag:"}, "type": ActivityType.ANNOUNCE.value}
-    )
-    # Cache the object
-    for activity in DB.activities.find():
-        if (
-            activity["box"] == Box.OUTBOX.value
-            and activity["type"] == ActivityType.LIKE.value
-        ):
-            like = ap.parse_activity(activity["activity"])
-            obj = like.get_object()
-            DB.activities.update_one(
-                {"remote_id": like.id},
-                {"$set": {"meta.object": obj.to_dict(embed=True)}},
-            )
-        elif activity["type"] == ActivityType.ANNOUNCE.value:
-            announce = ap.parse_activity(activity["activity"])
-            obj = announce.get_object()
-            DB.activities.update_one(
-                {"remote_id": announce.id},
-                {"$set": {"meta.object": obj.to_dict(embed=True)}},
-            )
-    return "Done"
-
-
-@app.route("/migration2")
-@login_required
-def tmp_migrate3():
-    for activity in DB.activities.find():
-        try:
-            activity = ap.parse_activity(activity["activity"])
-            actor = activity.get_actor()
-            if actor.icon:
-                MEDIA_CACHE.cache(actor.icon["url"], Kind.ACTOR_ICON)
-            if activity.type == ActivityType.CREATE.value:
-                for attachment in activity.get_object()._data.get("attachment", []):
-                    MEDIA_CACHE.cache(attachment["url"], Kind.ATTACHMENT)
-        except Exception:
-            app.logger.exception("failed")
-    return "Done"
-
-
-@app.route("/migration3")
-@login_required
-def tmp_migrate4():
-    for activity in DB.activities.find(
-        {"box": Box.OUTBOX.value, "type": ActivityType.UNDO.value}
-    ):
-        try:
-            activity = ap.parse_activity(activity["activity"])
-            if activity.get_object().type == ActivityType.FOLLOW.value:
-                DB.activities.update_one(
-                    {"remote_id": activity.get_object().id},
-                    {"$set": {"meta.undo": True}},
-                )
-                print(activity.get_object().to_dict())
-        except Exception:
-            app.logger.exception("failed")
-    for activity in DB.activities.find(
-        {"box": Box.INBOX.value, "type": ActivityType.UNDO.value}
-    ):
-        try:
-            activity = ap.parse_activity(activity["activity"])
-            if activity.get_object().type == ActivityType.FOLLOW.value:
-                DB.activities.update_one(
-                    {"remote_id": activity.get_object().id},
-                    {"$set": {"meta.undo": True}},
-                )
-                print(activity.get_object().to_dict())
-        except Exception:
-            app.logger.exception("failed")
-    return "Done"
-
-
-@app.route("/migration4")
-@login_required
-def tmp_migrate5():
-    for activity in DB.activities.find():
-        tasks.cache_actor.delay(activity["remote_id"], also_cache_attachments=False)
-
-    return "Done"
-
-
-@app.route("/migration5")
-@login_required
-def tmp_migrate6():
-    for activity in DB.activities.find():
-        # tasks.cache_actor.delay(activity["remote_id"], also_cache_attachments=False)
-
-        try:
-            a = ap.parse_activity(activity["activity"])
-            if a.has_type([ActivityType.LIKE, ActivityType.FOLLOW]):
-                DB.activities.update_one(
-                    {"remote_id": a.id},
-                    {
-                        "$set": {
-                            "meta.object_actor": activitypub._actor_to_meta(
-                                a.get_object().get_actor()
-                            )
-                        }
-                    },
-                )
-        except Exception:
-            app.logger.exception(f"processing {activity} failed")
-
     return "Done"
 
 
