@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% import 'utils.html' as utils %}
-{% block title %}{% if request.path == url_for('admin_stream') %}Stream{% else %}Notifications{% endif %} - {{ config.NAME }}{% endblock %}
+{% block title %}{% if request.path == url_for('admin.admin_stream') %}Stream{% else %}Notifications{% endif %} - {{ config.NAME }}{% endblock %}
 {% block content %}
 <div class="h-feed" id="container">
 	{% include "header.html" %}

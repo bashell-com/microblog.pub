@@ -228,7 +228,7 @@ def admin_logout():
 @noindex
 def admin_login():
     if session.get("logged_in") is True:
-        return redirect(url_for("admin_notifications"))
+        return redirect(url_for(".admin_notifications"))
 
     devices = [doc["device"] for doc in DB.u2f.find()]
     u2f_enabled = True if devices else False
@@ -250,7 +250,7 @@ def admin_login():
 
             session["logged_in"] = True
             return redirect(
-                request.args.get("redirect") or url_for("admin_notifications")
+                request.args.get("redirect") or url_for(".admin_notifications")
             )
         else:
             abort(401)
