@@ -1,6 +1,5 @@
 from datetime import datetime
 from datetime import timezone
-from functools import wraps
 import json
 import logging
 import mimetypes
@@ -8,14 +7,12 @@ import os
 import traceback
 from typing import Any
 from typing import Dict
-from urllib.parse import urlparse
 
 from bson.objectid import ObjectId
 from flask import Flask
 from flask import Response
 from flask import abort
 from flask import jsonify as flask_jsonify
-from flask import make_response
 from flask import redirect
 from flask import render_template
 from flask import request
@@ -35,12 +32,12 @@ from little_boxes.httpsig import HTTPSigAuth
 from little_boxes.httpsig import verify_request
 from little_boxes.webfinger import get_actor_url
 from little_boxes.webfinger import get_remote_follow_template
-from passlib.hash import bcrypt
 from u2flib_server import u2f
 
 from activitypub import Box
 from activitypub import embed_collection
 import activitypub
+import admin
 import api
 from config import BASE_URL
 from config import DB
@@ -51,7 +48,6 @@ from config import ID
 from config import KEY
 from config import ME
 from config import MEDIA_CACHE
-from config import PASS
 from config import USERNAME
 from config import VERSION
 import config
@@ -60,9 +56,11 @@ import filters
 import indieauth
 import migrations
 import tasks
+from utils.headers import noindex
 from utils.key import get_secret_key
 from utils.login import login_required
-from utils.lookup import lookup
+from utils.query import paginated_query
+from utils.thread import _build_thread
 
 back = activitypub.MicroblogPubBackend()
 ap.use_backend(back)
@@ -70,6 +68,7 @@ ap.use_backend(back)
 MY_PERSON = ap.Person(**ME)
 
 app = Flask(__name__)
+app.register_blueprint(admin.blueprint)
 app.register_blueprint(api.blueprint)
 app.register_blueprint(feeds.blueprint)
 app.register_blueprint(filters.blueprint)
@@ -92,10 +91,6 @@ else:
     root_logger.setLevel(gunicorn_logger.level)
 
 SIG_AUTH = HTTPSigAuth(KEY)
-
-
-def verify_pass(pwd):
-    return bcrypt.verify(pwd, PASS)
 
 
 @app.context_processor
@@ -149,29 +144,6 @@ def inject_config():
 def set_x_powered_by(response):
     response.headers["X-Powered-By"] = "microblog.pub"
     return response
-
-
-def add_response_headers(headers={}):
-    """This decorator adds the headers passed in to the response"""
-
-    def decorator(f):
-
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            resp = make_response(f(*args, **kwargs))
-            h = resp.headers
-            for header, value in headers.items():
-                h[header] = value
-            return resp
-
-        return decorated_function
-
-    return decorator
-
-
-def noindex(f):
-    """This decorator passes X-Robots-Tag: noindex, nofollow"""
-    return add_response_headers({"X-Robots-Tag": "noindex, nofollow"})(f)
 
 
 def jsonify(**data):
@@ -269,55 +241,6 @@ def serve_uploads(oid, fname):
     resp.headers.set("Content-Encoding", "gzip")
     return resp
 
-#######
-# Login
-
-
-@app.route("/admin/logout")
-@login_required
-def admin_logout():
-    session["logged_in"] = False
-    return redirect("/")
-
-
-@app.route("/login", methods=["POST", "GET"])
-@noindex
-def admin_login():
-    if session.get("logged_in") is True:
-        return redirect(url_for("admin_notifications"))
-
-    devices = [doc["device"] for doc in DB.u2f.find()]
-    u2f_enabled = True if devices else False
-    if request.method == "POST":
-        csrf.protect()
-        pwd = request.form.get("pass")
-        if pwd and verify_pass(pwd):
-            if devices:
-                resp = json.loads(request.form.get("resp"))
-                app.logger.debug(resp)
-                try:
-                    u2f.complete_authentication(session["challenge"], resp)
-                except ValueError as exc:
-                    app.logger.debug("failed", exc)
-                    abort(401)
-                    return
-                finally:
-                    session["challenge"] = None
-
-            session["logged_in"] = True
-            return redirect(
-                request.args.get("redirect") or url_for("admin_notifications")
-            )
-        else:
-            abort(401)
-
-    payload = None
-    if devices:
-        payload = u2f.begin_authentication(ID, devices)
-        session["challenge"] = payload
-
-    return render_template("login.html", u2f_enabled=u2f_enabled, payload=payload)
-
 
 @app.route("/remote_follow", methods=["GET", "POST"])
 def remote_follow():
@@ -383,42 +306,6 @@ def u2f_register():
 def drop_cache():
     DB.actors.drop()
     return "Done"
-
-
-def paginated_query(db, q, limit=25, sort_key="_id"):
-    older_than = newer_than = None
-    query_sort = -1
-    first_page = not request.args.get("older_than") and not request.args.get(
-        "newer_than"
-    )
-
-    query_older_than = request.args.get("older_than")
-    query_newer_than = request.args.get("newer_than")
-
-    if query_older_than:
-        q["_id"] = {"$lt": ObjectId(query_older_than)}
-    elif query_newer_than:
-        q["_id"] = {"$gt": ObjectId(query_newer_than)}
-        query_sort = 1
-
-    outbox_data = list(db.find(q, limit=limit + 1).sort(sort_key, query_sort))
-    outbox_len = len(outbox_data)
-    outbox_data = sorted(
-        outbox_data[:limit], key=lambda x: str(x[sort_key]), reverse=True
-    )
-
-    if query_older_than:
-        newer_than = str(outbox_data[0]["_id"])
-        if outbox_len == limit + 1:
-            older_than = str(outbox_data[-1]["_id"])
-    elif query_newer_than:
-        older_than = str(outbox_data[-1]["_id"])
-        if outbox_len == limit + 1:
-            newer_than = str(outbox_data[0]["_id"])
-    elif first_page and outbox_len == limit + 1:
-        older_than = str(outbox_data[-1]["_id"])
-
-    return outbox_data, older_than, newer_than
 
 
 CACHING = True
@@ -511,68 +398,6 @@ def with_replies():
         older_than=older_than,
         newer_than=newer_than,
     )
-
-
-def _build_thread(data, include_children=True):
-    data["_requested"] = True
-    app.logger.debug(data)
-    root_id = data["meta"].get("thread_root_parent", data["activity"]["object"]["id"])
-
-    query = {
-        "$or": [
-            {"meta.thread_root_parent": root_id, "type": "Create"},
-            {"activity.object.id": root_id},
-        ]
-    }
-    if data["activity"]["object"].get("inReplyTo"):
-        query["$or"].append(
-            {"activity.object.id": data["activity"]["object"]["inReplyTo"]}
-        )
-
-    # Fetch the root replies, and the children
-    replies = [data] + list(DB.activities.find(query))
-    replies = sorted(replies, key=lambda d: d["activity"]["object"]["published"])
-    # Index all the IDs in order to build a tree
-    idx = {}
-    replies2 = []
-    for rep in replies:
-        rep_id = rep["activity"]["object"]["id"]
-        if rep_id in idx:
-            continue
-        idx[rep_id] = rep.copy()
-        idx[rep_id]["_nodes"] = []
-        replies2.append(rep)
-
-    # Build the tree
-    for rep in replies2:
-        rep_id = rep["activity"]["object"]["id"]
-        if rep_id == root_id:
-            continue
-        reply_of = rep["activity"]["object"]["inReplyTo"]
-        try:
-            idx[reply_of]["_nodes"].append(rep)
-        except KeyError:
-            app.logger.info(f"{reply_of} is not there! skipping {rep}")
-
-    # Flatten the tree
-    thread = []
-
-    def _flatten(node, level=0):
-        node["_level"] = level
-        thread.append(node)
-
-        for snode in sorted(
-            idx[node["activity"]["object"]["id"]]["_nodes"],
-            key=lambda d: d["activity"]["object"]["published"],
-        ):
-            _flatten(snode, level=level + 1)
-
-    try:
-        _flatten(idx[root_id])
-    except KeyError:
-        app.logger.info(f"{root_id} is not there! skipping")
-
-    return thread
 
 
 @app.route("/note/<note_id>")
@@ -943,186 +768,6 @@ def outbox_activity_shares(item_id):
             col_name=f"outbox/{item_id}/shares",
             first_page=request.args.get("page") == "first",
         )
-    )
-
-
-@app.route("/admin", methods=["GET"])
-@login_required
-def admin():
-    q = {
-        "meta.deleted": False,
-        "meta.undo": False,
-        "type": ActivityType.LIKE.value,
-        "box": Box.OUTBOX.value,
-    }
-    col_liked = DB.activities.count(q)
-
-    return render_template(
-        "admin.html",
-        instances=list(DB.instances.find()),
-        inbox_size=DB.activities.count({"box": Box.INBOX.value}),
-        outbox_size=DB.activities.count({"box": Box.OUTBOX.value}),
-        col_liked=col_liked,
-        col_followers=DB.activities.count(
-            {
-                "box": Box.INBOX.value,
-                "type": ActivityType.FOLLOW.value,
-                "meta.undo": False,
-            }
-        ),
-        col_following=DB.activities.count(
-            {
-                "box": Box.OUTBOX.value,
-                "type": ActivityType.FOLLOW.value,
-                "meta.undo": False,
-            }
-        ),
-    )
-
-
-@app.route("/admin/lookup", methods=["GET", "POST"])
-@login_required
-def admin_lookup():
-    data = None
-    meta = None
-    if request.method == "POST":
-        if request.form.get("url"):
-            data = lookup(request.form.get("url"))
-            if data.has_type(ActivityType.ANNOUNCE):
-                meta = dict(
-                    object=data.get_object().to_dict(),
-                    object_actor=data.get_object().get_actor().to_dict(),
-                    actor=data.get_actor().to_dict(),
-                )
-
-        app.logger.debug(data)
-    return render_template(
-        "lookup.html", data=data, meta=meta, url=request.form.get("url")
-    )
-
-
-@app.route("/admin/thread")
-@login_required
-def admin_thread():
-    data = DB.activities.find_one(
-        {
-            "$or": [
-                {"remote_id": request.args.get("oid")},
-                {"activity.object.id": request.args.get("oid")},
-            ]
-        }
-    )
-    if not data:
-        abort(404)
-    if data["meta"].get("deleted", False):
-        abort(410)
-    thread = _build_thread(data)
-
-    tpl = "note.html"
-    if request.args.get("debug"):
-        tpl = "note_debug.html"
-    return render_template(tpl, thread=thread, note=data)
-
-
-@app.route("/admin/new", methods=["GET"])
-@login_required
-def admin_new():
-    reply_id = None
-    content = ""
-    thread = []
-    app.logger.debug(request.args)
-    if request.args.get("reply"):
-        data = DB.activities.find_one({"activity.object.id": request.args.get("reply")})
-        if data:
-            reply = ap.parse_activity(data["activity"])
-        else:
-            data = dict(
-                meta={},
-                activity=dict(
-                    object=get_backend().fetch_iri(request.args.get("reply"))
-                ),
-            )
-            reply = ap.parse_activity(data["activity"]["object"])
-
-        reply_id = reply.id
-        if reply.ACTIVITY_TYPE == ActivityType.CREATE:
-            reply_id = reply.get_object().id
-        actor = reply.get_actor()
-        domain = urlparse(actor.id).netloc
-        # FIXME(tsileo): if reply of reply, fetch all participants
-        content = f"@{actor.preferredUsername}@{domain} "
-        thread = _build_thread(data)
-
-    return render_template("new.html", reply=reply_id, content=content, thread=thread)
-
-
-@app.route("/admin/notifications")
-@login_required
-def admin_notifications():
-    # FIXME(tsileo): show unfollow (performed by the current actor) and liked???
-    mentions_query = {
-        "type": ActivityType.CREATE.value,
-        "activity.object.tag.type": "Mention",
-        "activity.object.tag.name": f"@{USERNAME}@{DOMAIN}",
-        "meta.deleted": False,
-    }
-    replies_query = {
-        "type": ActivityType.CREATE.value,
-        "activity.object.inReplyTo": {"$regex": f"^{BASE_URL}"},
-    }
-    announced_query = {
-        "type": ActivityType.ANNOUNCE.value,
-        "activity.object": {"$regex": f"^{BASE_URL}"},
-    }
-    new_followers_query = {"type": ActivityType.FOLLOW.value}
-    unfollow_query = {
-        "type": ActivityType.UNDO.value,
-        "activity.object.type": ActivityType.FOLLOW.value,
-    }
-    likes_query = {
-        "type": ActivityType.LIKE.value,
-        "activity.object": {"$regex": f"^{BASE_URL}"},
-    }
-    followed_query = {"type": ActivityType.ACCEPT.value}
-    q = {
-        "box": Box.INBOX.value,
-        "$or": [
-            mentions_query,
-            announced_query,
-            replies_query,
-            new_followers_query,
-            followed_query,
-            unfollow_query,
-            likes_query,
-        ],
-    }
-    inbox_data, older_than, newer_than = paginated_query(DB.activities, q)
-
-    return render_template(
-        "stream.html",
-        inbox_data=inbox_data,
-        older_than=older_than,
-        newer_than=newer_than,
-    )
-
-
-@app.route("/admin/stream")
-@login_required
-def admin_stream():
-    q = {"meta.stream": True, "meta.deleted": False}
-
-    tpl = "stream.html"
-    if request.args.get("debug"):
-        tpl = "stream_debug.html"
-        if request.args.get("debug_inbox"):
-            q = {}
-
-    inbox_data, older_than, newer_than = paginated_query(
-        DB.activities, q, limit=int(request.args.get("limit", 25))
-    )
-
-    return render_template(
-        tpl, inbox_data=inbox_data, older_than=older_than, newer_than=newer_than
     )
 
 
