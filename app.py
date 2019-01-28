@@ -55,6 +55,7 @@ from config import PASS
 from config import USERNAME
 from config import VERSION
 import config
+import feeds
 import filters
 import indieauth
 import migrations
@@ -70,6 +71,7 @@ MY_PERSON = ap.Person(**ME)
 
 app = Flask(__name__)
 app.register_blueprint(api.blueprint)
+app.register_blueprint(feeds.blueprint)
 app.register_blueprint(filters.blueprint)
 app.register_blueprint(indieauth.blueprint)
 app.register_blueprint(migrations.blueprint)
@@ -1339,32 +1341,6 @@ def liked():
             map_func=lambda doc: doc["activity"]["object"],
             col_name="liked",
         )
-    )
-
-
-@app.route("/feed.json")
-def json_feed():
-    return Response(
-        response=json.dumps(
-            activitypub.json_feed("/feed.json")
-        ),
-        headers={"Content-Type": "application/json"},
-    )
-
-
-@app.route("/feed.atom")
-def atom_feed():
-    return Response(
-        response=activitypub.gen_feed().atom_str(),
-        headers={"Content-Type": "application/atom+xml"},
-    )
-
-
-@app.route("/feed.rss")
-def rss_feed():
-    return Response(
-        response=activitypub.gen_feed().rss_str(),
-        headers={"Content-Type": "application/rss+xml"},
     )
 
 
