@@ -86,7 +86,7 @@ def indieauth_flow():
     return redirect(red)
 
 
-# @blueprint.route('/indieauth', methods=['GET', 'POST'])
+@blueprint.route('/indieauth', methods=['GET', 'POST'])
 def indieauth_endpoint():
     if request.method == "GET":
         if not session.get("logged_in"):
