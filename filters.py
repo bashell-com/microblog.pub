@@ -378,7 +378,8 @@ def translate(html):
         current_app.logger.debug(f'translated html is {similar}% similar to the original')
         return (
             f'{html}<hr/>{reference}'
-            f'<div style="float:left;margin-top:10px;">{translated_html}</div>'
+            '<div style="clear:both;"></div>'
+            f'{translated_html}'
             '<div style="clear:both;"></div>'
         )
     else:
