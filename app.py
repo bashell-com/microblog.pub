@@ -6,6 +6,7 @@ import os
 import traceback
 import urllib
 from datetime import datetime
+from datetime import timedelta
 from datetime import timezone
 from functools import wraps
 from io import BytesIO
@@ -73,6 +74,7 @@ from config import MEDIA_CACHE
 from config import PASS
 from config import USERNAME
 from config import VERSION
+from config import TIMEZONE
 from config import _drop_db
 from utils.key import get_secret_key
 from utils.lookup import lookup
@@ -323,7 +325,14 @@ def get_actor(url):
 def format_time(val):
     if val:
         dt = parser.parse(val)
-        return datetime.strftime(dt, "%B %d, %Y, %H:%M %p")
+        tz = timedelta(hours=TIMEZONE)
+        if TIMEZONE == 0:
+            tz_name = " UTC"
+        elif TIMEZONE>0:
+            tz_name = f" GMT+{TIMEZONE}"
+        else:
+            tz_name = f" GMT{TIMEZONE}"
+        return datetime.strftime(dt + tz, "%b %d, %Y, %H:%M:%S") + tz_name
     return val
 
 
