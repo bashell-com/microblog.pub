@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% import 'utils.html' as utils %}
-{% block header %}{% endblock %}
+{% block headers %}{% endblock %}
 {% block content %}
 <div style="width: 90%; max-width: 720px; margin: 40px auto;">
 	{% include "header.html" %}
@@ -15,7 +15,7 @@
 		<data class="p-name" value="{{ config.USERNAME }}"></data>
 		<div style="flex: 1; padding-left: 30px;">
 			{{ text | safe }}
-			<div class="p-note" style="margin: 20px 0;">{{ me.summary }}</div>
+			<div class="p-note" style="margin: 20px 0;">{{ me.summary | emojize }}</div>
 		</div>
 	</div>
 

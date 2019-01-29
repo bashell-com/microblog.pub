@@ -76,6 +76,9 @@ app.register_blueprint(indieauth.blueprint)
 app.register_blueprint(migrations.blueprint)
 app.secret_key = get_secret_key("flask")
 app.config.update(WTF_CSRF_CHECK_DEFAULT=False)
+app.jinja_env.trim_blocks = True
+app.jinja_env.lstrip_blocks = True
+app.jinja_env.strip_trailing_newlines = False
 csrf = CSRFProtect(app)
 
 logger = logging.getLogger(__name__)

@@ -155,7 +155,7 @@ a:hover {
 #container {
   width: 90%;
   max-width: 720px;
-  margin-top: 45px;
+  margin-top: 50px;
   margin-bottom: 30px;
   margin-left: auto;
   margin-right: auto;
@@ -197,6 +197,8 @@ a:hover {
   }
 }
 .note-box {
+  padding-top: 60px;
+  margin-top: -60px;
   margin-bottom: 20px;
   border: 1px;
 }
@@ -335,7 +337,7 @@ form.action-form {
   color: $color-summary;
   font-size: 1.1em;
   margin-top: 10px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 .summary a, .summay a:hover {
   color: $color-summary;

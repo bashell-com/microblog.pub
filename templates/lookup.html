@@ -1,8 +1,25 @@
 {% extends "layout.html" %}
 {% import 'utils.html' as utils %}
 {% block title %}Lookup - {{ config.NAME }}{% endblock %}
+{% block headers %}
+<style>
+#lookup-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: calc(100vh - 180px);
+}
+
+#lookup-form {
+    margin: auto;
+    display: inline;
+}
+</style>
+{% endblock %}
 {% block content %}
-<div id="container">
+<div id="lookup-container">
 {% include "header.html" %}
 	<div style="margin-top: 50px;">
 		<form id="lookup-form" method="POST">
@@ -39,4 +56,3 @@
 	</div>
 </div>
 {% endblock %}
-

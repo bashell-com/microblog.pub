@@ -6,7 +6,7 @@
 	{% if not session.logged_in %}
 		<a class="remote-follow-button" href="/remote_follow"><small>Remote follow</small></a>
 	{% endif %}
-		<div class="p-note summary">{{ config.SUMMARY | safe }}</div>
+		<div class="p-note summary">{{ config.SUMMARY | emojize | safe }}</div>
 	</div>
 	<div class="menu">
 		<ul>

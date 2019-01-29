@@ -1,14 +1,14 @@
 {% extends "layout.html" %}
 {% import 'utils.html' as utils %}
 {% block title %}#{{ tag }} - {{ config.NAME }}{% endblock %}
-{% block header %}
+{% block headers %}
 <link rel="self" href="{{ config.ID }}/">
 <link rel="hub" href="https://pubsubhubbub.superfeedr.com/">
 <meta content="profile" property="og:type" />
 <meta content="{{ config.ID }}" property="og:url" />
 <meta content="{{ config.USERNAME }}" property="og:site_name" />
 <meta content="{{ config.USERNAME }}" property="og:title" />
-<meta content="{{ me.summary | html2plaintext }}" property="og:description" />
+<meta content="{{ me.summary | html2plaintext | emojize }}" property="og:description" />
 <meta content="{{ me.icon.url }}" property="og:image" />
 <meta content="200" property="og:image:width" />
 <meta content="200" property="og:image:height" />
