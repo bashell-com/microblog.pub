@@ -243,7 +243,7 @@ a:hover {
   strong { font-weight:600; }
 
   .note-container {
-    clear: right;
+    clear: both;
     padding:10px 0;
     word-break: normal;
   }
@@ -258,7 +258,7 @@ a:hover {
 }
 .og-link {
   text-decoration: none;
-  word-break: break-all;
+  word-break: normal;
 }
 .og-link:hover { text-decoration: none; }
 .bar-item-no-hover {

@@ -38,7 +38,7 @@
         {% set boost_actor = item.meta.actor %}
         {% if session.logged_in %}
         <div style="margin-left:0px;padding-bottom:0px;margin-bottom:0px;">
-        <span class="bar-item-no-hover"><a style="color:#808080;" href="{{ boost_actor.url | get_url }}">{{ boost_actor.name }}</a> boosted</span>
+        <span class="bar-item-no-hover"><a style="color:#808080;" href="{{ boost_actor.url | get_url }}">You</a> boosted</span>
 <form action="/api/undo" class="action-form"  method="POST">
 <input type="hidden" name="redirect" value="/"/>
 <input type="hidden" name="id" value="{{ item.remote_id }}"/>

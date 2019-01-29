@@ -34,7 +34,7 @@
       <div class="note-wrapper">
         <div style="clear:both;height:40px;">
           <a href="{{ actor | url_or_id | get_url }}"
-             style="margin:0; text-decoration:none; margin:0; text-decoration:none;
+             style="margin:0; text-decoration:none; text-decoration:none;
                     display:block; width:80%; overflow:hidden; white-space:nowrap;
                     text-overflow:ellipsis; float:left;"
              class="no-hover">
@@ -96,13 +96,14 @@
         {% for og in meta.og_metadata %}
           {% if og.url %}
             <a href="{{ og.url }}" class="og-link" style="margin:30px 0;clear:both;display: flex;">
-              <div>
-                <img  style="width:100px;border-radius:3px;" src="{{ og.image | get_og_image_url }}">
-              </div>
-              <div style="padding:0 20px;">
-                <strong>{{ og.title }}</strong>
-                <p>{{ og.description | truncate(80) }}</p>
-                <small>{{ og.site_name }}</small>
+              <div style="padding: 0 20px;">
+                <img style="width:100px;border-radius:3px;float:left;margin-top:16px;margin-right:10px;"
+                     src="{{ og.image | get_og_image_url }}">
+                <p>
+                  <strong>{{ og.title }}</strong>
+                  <p>{{ og.description | truncate(80) }}</p>
+                  <small>{{ og.site_name }}</small>
+                </p>
               </div>
             </a>
           {% endif %}
