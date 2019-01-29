@@ -22,3 +22,5 @@ git+https://github.com/tsileo/little-boxes.git
 pyyaml
 pillow
 cachetools
+gevent
+

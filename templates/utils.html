@@ -34,8 +34,8 @@
 </div>
 
 <div class="note-wrapper">
-    <div style="clear:both;height:20px;">
-	<a href="{{ actor | url_or_id | get_url }}" style="margin:0;text-decoration:none;margin: 0;text-decoration: none;display: block;width: 80%;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;float: left;" class="no-hover"><strong>{{ actor.name or actor.preferredUsername }}</strong>
+    <div style="clear:both;height:40px;">
+	<a href="{{ actor | url_or_id | get_url }}" style="margin:0;text-decoration:none;margin: 0;text-decoration: none;display: block;width: 80%;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;float: left;" class="no-hover"><strong>{{ actor.name or actor.preferredUsername }}</strong><br/>
         <span class="l">@{% if not no_color and obj.id | is_from_outbox %}<span class="pcolor">{{ actor.preferredUsername }}</span>{% else %}{{ actor.preferredUsername }}{% endif %}@{% if not no_color and obj.id | is_from_outbox %}<span class="pcolor">{{ actor | url_or_id | get_url | domain }}</span>{% else %}{{ actor | url_or_id | get_url | domain }}{% endif %}</span></a>
 
 	{% if not perma %}
@@ -105,14 +105,6 @@
 
 
 <div class="bottom-bar">
-{% if perma %}<span class="perma-item">{{ obj.published | format_time }}</span>
-{% if not (obj.id | is_from_outbox) %}
-<a class ="bar-item" href="{{ obj | url_or_id | get_url }}">permalink</a> 
-{% endif %}
-{% else %}
-<a class ="bar-item" href="{{ obj | url_or_id | get_url }}">permalink</a> 
-{% endif %}
-
 {% if session.logged_in %}
 {% set perma_id = obj.id | permalink_id %}
 {% set redir = request.path + "#activity-" + perma_id %}
@@ -197,6 +189,13 @@
 {% endif %}
 {% endif %}
 
+{% if perma %}<span class="perma-item">{{ obj.published | format_time }}</span>
+{% if not (obj.id | is_from_outbox) %}
+<a class ="bar-item" href="{{ obj | url_or_id | get_url }}">permalink</a>
+{% endif %}
+{% else %}
+<a class ="bar-item" href="{{ obj | url_or_id | get_url }}">permalink</a>
+{% endif %}
 
 </div>
 

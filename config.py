@@ -42,9 +42,14 @@ try:
 except ModuleNotFoundError:
     custom_cache_purge_hook = noop
 
-VERSION = (
-    subprocess.check_output(["git", "describe", "--always"]).split()[0].decode("utf-8")
-)
+try:
+    VERSION = (
+        subprocess.check_output(["git", "describe", "--always"]).split()[0].decode("utf-8")
+    )
+except:
+    VERSION = (
+        subprocess.check_output(["hg", "id", "-i"]).split()[0].decode("utf-8")
+    )
 
 DEBUG_MODE = strtobool(os.getenv("MICROBLOGPUB_DEBUG", "false"))
 

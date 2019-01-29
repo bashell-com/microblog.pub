@@ -23,7 +23,7 @@
 <div id="notes">
 	{% for item in pinned %}
     {% if item.meta.pinned %}
-    <p style="margin-left:65px;padding-bottom:5px;">
+    <p style="margin-left:0px;margin-bottom:5px;padding-bottom:0px;">
     <span class="bar-item-pinned">pinned</span>
     </p>
     {% endif %}
@@ -36,7 +36,7 @@
 	{% if item | has_type('Announce') %}
         {% set boost_actor = item.meta.actor %}
         {% if session.logged_in %}
-        <div style="margin-left:65px;padding-bottom:5px;margin-bottom:15px;">
+        <div style="margin-left:0px;padding-bottom:0px;margin-bottom:0px;">
         <span class="bar-item-no-hover"><a style="color:#808080;" href="{{ boost_actor.url | get_url }}">{{ boost_actor.name }}</a> boosted</span>
 <form action="/api/undo" class="action-form"  method="POST">
 <input type="hidden" name="redirect" value="/"/>
@@ -46,7 +46,7 @@
 </form>
         </div>
         {% else %}
-        <p style="margin-left:65px;padding-bottom:5px;">
+        <p style="margin-left:0px;margin-bottom:5px;padding-bottom:0px;">
         <span class="bar-item-no-hover"><a style="color:#808080;" href="{{ boost_actor.url | get_url }}">{{ boost_actor.name }}</a> boosted</span>
         </p>
         {% endif %}

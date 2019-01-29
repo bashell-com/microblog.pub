@@ -27,6 +27,7 @@ a, h1, h2, h3, h4, h5, h6 {
 }
 a {
   text-decoration: none;
+  word-break: break-all;
 }
 a:hover {
   text-decoration: underline;
@@ -190,7 +191,9 @@ a:hover {
   }
 }
 .note-box {
-  margin-bottom: 70px;
+  margin-bottom: 20px;
+  border: 1px;
+  border-style: dashed;
 }
 .note {
   display: flex;
@@ -212,7 +215,10 @@ a:hover {
     padding-left: 15px;
   }
 
-  .bottom-bar { margin-top:10px; }
+  .bottom-bar {
+    float: right;
+    margin-top:5px;
+  }
 
   .img-attachment {
     max-width:100%;
@@ -240,9 +246,9 @@ a:hover {
 .bar-item-no-hover {
   cursor: default;
   background: $color-menu-background;
-  padding: 5px;
+  padding-left: 5px;
   color: $color-light;
-  margin-right:5px;
+  margin-right:0px;
   border-radius:2px;
 }
 .bar-item-no-hover:hover {
@@ -253,7 +259,7 @@ a:hover {
   background: $color-menu-background;
   color: $color-light;
   padding: 5px;
-  margin-right:5px;
+  margin-right:0px;
   border-radius:2px;
 }
 .bar-item-pinned:hover {
@@ -261,9 +267,9 @@ a:hover {
 }
 .bar-item {
   background: $color-menu-background;
-  padding: 5px;
+  padding-left: 5px ;
   color: $color-light;
-  margin-right:5px;
+  margin-right:0px;
   border-radius:2px;
 }
 .bar-item:hover {
@@ -280,10 +286,11 @@ form.action-form {
   font-size: 1.25em;
 }
 .bottom-bar .perma-item {
-  margin-right: 5px;
+  margin-right: 0px;
 }
 .bottom-bar a.bar-item:hover {
   text-decoration: none;
+  word-break: normal;
 }
 .footer > div  {
   width: 90%;
