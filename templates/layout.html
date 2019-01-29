@@ -40,6 +40,7 @@
 	<small class="microblogpub-version"><code>{{ microblogpub_version }}</code></small>
 	(<a href="https://github.com/bashell-com/microblog.pub">source code</a>)
 	and the <a href="https://activitypub.rocks/">ActivityPub</a> protocol
+	{% if logged_in %}{% else %}[<a href="/login">🔑</a>]{% endif %}
 </div>
 </div>
 </body>
