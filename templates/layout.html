@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
 <title>{% block title %}{{ config.NAME }}{% endblock %}'s microblog</title>
 <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
+<link rel='stylesheet' href='/static/css/BlobMoji.css'>
 <link rel="authorization_endpoint" href="{{ config.ID }}/indieauth">
 <link rel="token_endpoint" href="{{ config.ID }}/token">
 {% if not request.args.get("older_than") and not request.args.get("previous_than") %}<link rel="canonical" href="https://{{ config.DOMAIN }}{{ request.path }}">{% endif %}
@@ -14,7 +15,7 @@
 <style>{{ config.CSS | safe }}</style>
 {% block headers %}{% endblock %}
 </head>
-<body>
+<body style="font-family:sans-serif,BlobMoji">
 {% if logged_in %}
 <div id="admin-menu-wrapper">
 <ul id="admin-menu">
@@ -41,6 +42,8 @@
 	(<a href="https://github.com/bashell-com/microblog.pub">source code</a>)
 	and the <a href="https://activitypub.rocks/">ActivityPub</a> protocol
 	{% if logged_in %}{% else %}[<a href="/login">🔑</a>]{% endif %}
+	<br/>
+	Thanks to <a href="https://github.com/C1710/blobmoji">BlobMoji</a> for bringing back the cute yellow blob 😇
 </div>
 </div>
 </body>
