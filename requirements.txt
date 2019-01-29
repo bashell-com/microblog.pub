@@ -23,4 +23,7 @@ pyyaml
 pillow
 cachetools
 gevent
-
+emoji
+langdetect
+similar_text
+yandex-translater

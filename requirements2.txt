@@ -1,4 +1,0 @@
-emoji
-langdetect
-similar_text
-yandex-translater
