@@ -84,6 +84,9 @@ with open(os.path.join(KEY_DIR, "me.yml")) as f:
     THEME_COLOR = theme_conf.get("color", DEFAULT_THEME_PRIMARY_COLOR[THEME_STYLE])
     TIMEZONE = int(conf.get("timezone_hours", 0))
     CDN_URL = conf.get("cdn_url", "")
+    YANDEX_TRANSLATE_API = conf.get("yandex_translate_api_key", "")
+    NO_TRANSLATE = conf.get("no_translate", [])
+    TARGET_LANG = conf.get("target_lang", "en")
 
 SASS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sass")
 theme_css = f"$primary-color: {THEME_COLOR};\n"
@@ -117,6 +120,7 @@ def create_indexes():
     ])
     DB.cache2.create_index([("path", pymongo.ASCENDING), ("type", pymongo.ASCENDING), ("arg", pymongo.ASCENDING)])
     DB.cache2.create_index("date", expireAfterSeconds=3600 * 12)
+    DB.translate.create_index([("hash", pymongo.ASCENDING), ("target_lang", pymongo.ASCENDING)])
 
     # Index for the block query
     DB.activities.create_index(

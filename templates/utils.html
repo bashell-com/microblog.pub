@@ -53,7 +53,7 @@
 			{% if obj | has_type('Article') %} {{ obj.name }}
 				<a href="{{ obj | url_or_id | get_url }}">{{ obj | url_or_id | get_url }}</a>
 			{% else %}
-				{{ obj.content | clean | emojize | safe }}
+				{{ obj.content | clean | emojize | translate | safe }}
 			{% endif %}
 			</div>
 			{% if obj.attachment and obj | has_type('Note') %}
