@@ -15,10 +15,10 @@
 <input type="hidden" name="redirect" value="/">
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 {% if reply %}<input type="hidden" name="reply" value="{{reply}}">{% endif %}
-<textarea name="content" rows="10" cols="50" autofocus="autofocus">{{ content }}</textarea>
-<input type="file" name="file">
-<div style="margin-top:20px;">
-<input type="submit" value="post">
+<textarea style="width: calc(100% - 20px);" name="content" rows="10" cols="50" autofocus="autofocus">{{ content }}</textarea>
+<input style="width: calc(100% - 20px);" type="file" name="file">
+<div style="margin-top:20px; width: 100%;">
+<input style="width: 100%;" type="submit" value="post">
 </div>
 </form>
 
