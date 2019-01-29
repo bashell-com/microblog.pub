@@ -27,7 +27,7 @@ a, h1, h2, h3, h4, h5, h6 {
 }
 a {
   text-decoration: none;
-  word-break: break-all;
+  word-break: normal;
 }
 a:hover {
   text-decoration: underline;
@@ -61,16 +61,18 @@ a:hover {
   color: $background-color;
 }
 #admin-menu-wrapper {
-  padding: 10px;
   margin:0 auto;
   width: 100%;
   background: $color-menu-background;
   max-width: 720px;
+  position: fixed;
+  align-self: center;
 
 #admin-menu {
   list-style-type: none;
-  display: inline;
-  padding: 10px;
+  display: block;
+  padding: 5px;
+  margin-top: 0;
   color: $color-light;
   border-radius-bottom-left: 2px;
   border-radius-bottom-right: 2px;
@@ -197,6 +199,7 @@ a:hover {
 }
 .note {
   display: flex;
+  width: 100%;
   .l {
     color: $color-note-link;
   }
@@ -216,8 +219,10 @@ a:hover {
   }
 
   .bottom-bar {
-    float: right;
     margin-top:5px;
+    display: flex;
+    flex-direction: row-reverse;
+    flex-wrap: wrap-reverse;
   }
 
   .img-attachment {
@@ -237,11 +242,19 @@ a:hover {
     padding:10px 0;
     word-break: normal;
   }
+
+  .note-container a {
+    word-break: break-all;
+    color: steelblue;
+  }
 }
 .color-menu-background {
   background: $color-menu-background;
 }
-.og-link { text-decoration: none; }
+.og-link {
+  text-decoration: none;
+  word-break: break-all;
+}
 .og-link:hover { text-decoration: none; }
 .bar-item-no-hover {
   cursor: default;
@@ -267,10 +280,12 @@ a:hover {
 }
 .bar-item {
   background: $color-menu-background;
-  padding-left: 5px ;
   color: $color-light;
-  margin-right:0px;
-  border-radius:2px;
+  margin-top: 1px;
+  margin-bottom: 0px;
+  margin-left: 2px;
+  margin-right: 0px;
+  border-radius: 2px;
 }
 .bar-item:hover {
   background: $primary-color;
@@ -288,9 +303,11 @@ form.action-form {
 .bottom-bar .perma-item {
   margin-right: 0px;
 }
+.bottom-bar a.bar-item {
+  word-break: normal;
+}
 .bottom-bar a.bar-item:hover {
   text-decoration: none;
-  word-break: normal;
 }
 .footer > div  {
   width: 90%;

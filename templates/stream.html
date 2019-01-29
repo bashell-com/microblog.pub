@@ -16,7 +16,7 @@
 	{% if item | has_type('Announce') %}
 	{% set boost_actor = item.meta.actor %}
     {% if boost_actor %}
-	<p style="margin-left:70px;padding-bottom:5px;"><span class="bar-item-no-hover"><a style="color:#808080;" href="{{ boost_actor.url | get_url }}">{{ boost_actor.name or boost_actor.preferredUsername }}</a> boosted</span></p>
+	<p style="margin-bottom:0px;"><span class="bar-item-no-hover"><a style="color:#808080;" href="{{ boost_actor.url | get_url }}">{{ boost_actor.name or boost_actor.preferredUsername }}</a> boosted</span></p>
     {% endif %}
 	{% if item.meta.object %}
 	{{ utils.display_note(item.meta.object, ui=True) }}
@@ -25,27 +25,27 @@
 
     {% if item | has_type('Like') %}
     {% set boost_actor = item.meta.actor %}
-	<p style="margin-left:70px;padding-bottom:5px;"><span class="bar-item-no-hover"><a style="color:#808080;" href="{{ boost_actor.url | get_url }}">{{ boost_actor.name or boost_actor.preferredUsername }}</a> liked</span></p>
+	<p style="margin-botom:0px;"><span class="bar-item-no-hover"><a style="color:#808080;" href="{{ boost_actor.url | get_url }}">{{ boost_actor.name or boost_actor.preferredUsername }}</a> liked</span></p>
 	{% if item.meta.object %}
     {{ utils.display_note(item.meta.object, ui=False, meta={'actor': item.meta.object_actor}) }}
 	{% endif %}
     {% endif %}
 	
 	{% if item | has_type('Follow') %}
-    <p style="margin-left:70px;padding-bottom:5px;"><span class="bar-item-no-hover">new follower</span> <!-- <a href="" class="bar-item">follow back</a></p> -->
-    <div style="height: 100px;">
+    <p style="margin-bottom:0px;"><span class="bar-item-no-hover">new follower</span> <!-- <a href="" class="bar-item">follow back</a></p> -->
+    <div class="note-box">
 	{{ utils.display_actor_inline(item.meta.actor, size=50) }}
     </div>
 
 	{% elif item | has_type('Accept') %}
-    <p style="margin-left:70px;padding-bottom:5px;"><span class="bar-item-no-hover">you started following</span></p>
-    <div style="height: 100px;">
+    <p style="margin-bottom:0px;"><span class="bar-item-no-hover">you started following</span></p>
+    <div class="note-box">
 	{{ utils.display_actor_inline(item.meta.actor, size=50) }}
     </div>
 
 	{% elif item | has_type('Undo') %}
-    <p style="margin-left:70px;padding-bottom:5px;"><span class="bar-item-no-hover">unfollowed you</span></p>
-    <div style="height: 100px;">
+    <p style="margin-bottom:0px;"><span class="bar-item-no-hover">unfollowed you</span></p>
+    <div class="note-box">
 	{{ utils.display_actor_inline(item.meta.actor, size=50) }}
     </div>
 

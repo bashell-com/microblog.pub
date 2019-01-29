@@ -105,6 +105,14 @@
 
 
 <div class="bottom-bar">
+{% if perma %}<span class="perma-item">{{ obj.published | format_time }}</span>
+{% if not (obj.id | is_from_outbox) %}
+<a class ="bar-item" href="{{ obj | url_or_id | get_url }}">permalink</a>
+{% endif %}
+{% else %}
+<a class ="bar-item" href="{{ obj | url_or_id | get_url }}">permalink</a>
+{% endif %}
+
 {% if session.logged_in %}
 {% set perma_id = obj.id | permalink_id %}
 {% set redir = request.path + "#activity-" + perma_id %}
@@ -180,21 +188,15 @@
 {% endif %}
 
 {% else %}
+<!--
 <form action="/api/block" class="action-form"  method="POST">
 <input type="hidden" name="redirect" value="{{ redir }}">
 <input type="hidden" name="actor" value="{{ actor.id }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 <button type="submit" class="bar-item">block</button>
 </form>
+-->
 {% endif %}
-{% endif %}
-
-{% if perma %}<span class="perma-item">{{ obj.published | format_time }}</span>
-{% if not (obj.id | is_from_outbox) %}
-<a class ="bar-item" href="{{ obj | url_or_id | get_url }}">permalink</a>
-{% endif %}
-{% else %}
-<a class ="bar-item" href="{{ obj | url_or_id | get_url }}">permalink</a>
 {% endif %}
 
 </div>
