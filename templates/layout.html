@@ -16,10 +16,9 @@
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css"
         integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w"
         crossorigin="anonymous">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mali"
-        crossorigin="anonymous">
-  <link rel="stylesheet" href="{{ config.CDN_URL }}/static/css/BlobMoji.css">
-  <link rel="stylesheet" href="{{ config.CDN_URL }}/static/css/FreeSerif.css">
+  <link rel="stylesheet" href="/static/css/Mali.css">
+  <link rel="stylesheet" href="/static/css/BlobMoji.css">
+  <link rel="stylesheet" href="/static/css/Quivira.css">
   <link rel="stylesheet" href="{{ config.CDN_URL }}/static/css/notepad.css">
   <link rel="authorization_endpoint" href="{{ config.ID }}/indieauth">
   <link rel="token_endpoint" href="{{ config.ID }}/token">
@@ -33,7 +32,7 @@
   <style>{{ config.CSS | safe }}</style>
   {% block headers %}{% endblock %}
 </head>
-<body style="font-family:Mali,FreeSerif,BlobMoji,cursive !important;">
+<body style="font-family:Mali,BlobMoji,Quivira !important;">
 {% if logged_in %}
   <div id="admin-menu-wrapper">
     <ul id="admin-menu">

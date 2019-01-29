@@ -1,0 +1,7 @@
+@font-face {
+    font-family: 'Quivira';
+    src: local('Quivira'),
+         url('/static/fonts/Quivira.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}

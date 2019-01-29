@@ -1,0 +1,7 @@
+@font-face {
+    font-family: 'FreeSerif';
+    src: local('FreeSerif'),
+         url('/static/fonts/FreeSerif.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
