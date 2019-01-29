@@ -263,10 +263,11 @@ a:hover {
 .bar-item-no-hover {
   cursor: default;
   background: $color-menu-background;
-  padding-left: 5px;
+  padding: 1px 6px;
   color: $color-light;
   margin-right:0px;
   border-radius:2px;
+  display: inline-block;
 }
 .bar-item-no-hover:hover {
   cursor: default;
@@ -290,6 +291,7 @@ a:hover {
   margin-left: 2px;
   margin-right: 0px;
   border-radius: 2px;
+  padding: 1px 6px;
 }
 .bar-item:hover {
   background: $primary-color;
@@ -305,7 +307,13 @@ form.action-form {
   font-size: 1.25em;
 }
 .bottom-bar .perma-item {
+  margin-left: 2px;
   margin-right: 0px;
+  margin-top: 1px;
+  padding: 1px 6px;
+  color: $primary-color;
+  background: $color-menu-background;
+  border-radius: 2px;
 }
 .bottom-bar a.bar-item {
   word-break: normal;
