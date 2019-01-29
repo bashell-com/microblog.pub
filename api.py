@@ -25,6 +25,7 @@ from activitypub import Box
 import activitypub
 from config import ADMIN_API_KEY
 from config import BASE_URL
+from config import CDN_URL
 from config import DB
 from config import DEBUG_MODE
 from config import ID
@@ -282,13 +283,15 @@ def api_new_note():
             file.save(buf)
             oid = MEDIA_CACHE.save_upload(buf, rfilename)
         mtype = mimetypes.guess_type(rfilename)[0]
-
+        url = f"{BASE_URL}/uploads/{oid}/{rfilename}"
+        if CDN_URL:
+            url = f"{CDN_URL}/uploads/{oid}/{rfilename}"
         raw_note["attachment"] = [
             {
                 "mediaType": mtype,
                 "name": rfilename,
                 "type": "Document",
-                "url": f"{BASE_URL}/uploads/{oid}/{rfilename}",
+                "url": url,
             }
         ]
 
