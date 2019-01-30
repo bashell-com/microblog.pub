@@ -1,4 +1,3 @@
-from copy import copy
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
@@ -29,6 +28,7 @@ from config import CDN_URL
 from config import DB
 from config import ID
 from config import MEDIA_CACHE
+from config import SIMILARITY_THRESHOLD
 from config import TIMEZONE
 from config import YANDEX_TRANSLATE_API, NO_TRANSLATE, TARGET_LANG
 from utils.emoji import flexmoji
@@ -292,9 +292,7 @@ def translate(html):
         current_app.logger.debug(f'cached similarity {similar}%')
     else:
         current_app.logger.debug('translation cache MISS')
-        tags = copy(ALLOWED_TAGS)
-        tags.remove('a')
-        clean_html = bleach.clean(html, tags=tags)
+        clean_html = bleach.clean(html, tags=ALLOWED_TAGS)
         text = html2text(clean_html)
         try:
             langs = langdetect.detect_langs(text)
@@ -374,7 +372,7 @@ def translate(html):
         '</div>'
     )
 
-    if similar < 80:
+    if similar < SIMILARITY_THRESHOLD:
         current_app.logger.debug(f'translated html is {similar}% similar to the original')
         return (
             f'{html}<hr/>{reference}'

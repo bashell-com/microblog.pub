@@ -87,6 +87,7 @@ with open(os.path.join(KEY_DIR, "me.yml")) as f:
     YANDEX_TRANSLATE_API = conf.get("yandex_translate_api_key", "")
     NO_TRANSLATE = conf.get("no_translate", [])
     TARGET_LANG = conf.get("target_lang", "en")
+    SIMILARITY_THRESHOLD = conf.get("similarity_threshold", 94)
 
 SASS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sass")
 theme_css = f"$primary-color: {THEME_COLOR};\n"
