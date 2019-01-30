@@ -24,6 +24,7 @@ pillow
 cachetools
 gevent
 emoji
-langdetect
+git+https://github.com/bashell-com/langdetect.git
 similar_text
 yandex-translater
+
