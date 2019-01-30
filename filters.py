@@ -287,6 +287,8 @@ def translate(html):
         detected_prob = cache['detected_prob']
         translated_html = cache['translated_html']
         similar = cache['similar']
+        if detected_lang in NO_TRANSLATE:
+            return html
         current_app.logger.debug('translation cache HIT')
         current_app.logger.debug(f'cached detected language {detected_lang}:{detected_prob}')
         current_app.logger.debug(f'cached similarity {similar}%')
