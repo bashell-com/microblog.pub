@@ -106,21 +106,4 @@
   font-weight: normal;
   font-style: normal;
 }
-@font-face {
-  font-family: 'Quivira';
-  src: local('Quivira'),
-       url('/static/fonts/Quivira/Quivira-20D0-20F0.woff2') format('woff2'),
-       url('/static/fonts/Quivira/Quivira-20D0-20F0.woff') format('woff');
-  unicode-range: U+20D0-20F0;
-  font-weight: normal;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'Quivira';
-  src: local('Quivira'),
-       url('/static/fonts/Quivira/Quivira-1EE00-1EEFF.woff2') format('woff2'),
-       url('/static/fonts/Quivira/Quivira-1EE00-1EEFF.woff') format('woff');
-  unicode-range: U+1EE00-1EEFF;
-  font-weight: normal;
-  font-style: normal;
-}
+
