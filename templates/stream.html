@@ -32,28 +32,37 @@
 						{% endif %}
 					{% endif %}
 					{% if item | has_type('Follow') %}
-						<p style="margin-bottom:0px;">
+						<div style="margin-bottom:0px;">
 							<span class="bar-item-no-hover">new follower</span>
-							<!--
-							<a href="" class="bar-item">follow back</a>
-							-->
-						</p>
+							<form action="/api/follow" class="action-form" method="POST">
+								<input type="hidden" name="redirect" value="{{ request.path }}" />
+								<input type="hidden" name="actor" value="{{ item.meta.actor.id }}" />
+								<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+								<button type="submit" class="bar-item">follow back</button>
+							</form>
+						</div>
 						<div class="note-box">
-							{{ utils.display_actor_inline(item.meta.actor, size=50) }}
+							<div class="note notepad">
+								{{ utils.display_actor_inline(item.meta.actor, size=50) }}
+							</div>
 						</div>
 					{% elif item | has_type('Accept') %}
 						<p style="margin-bottom:0px;">
 							<span class="bar-item-no-hover">you started following</span>
 						</p>
 						<div class="note-box">
-							{{ utils.display_actor_inline(item.meta.actor, size=50) }}
+							<div class="note notepad">
+								{{ utils.display_actor_inline(item.meta.actor, size=50) }}
+							</div>
 						</div>
 					{% elif item | has_type('Undo') %}
 						<p style="margin-bottom:0px;">
 							<span class="bar-item-no-hover">unfollowed you</span>
 						</p>
 						<div class="note-box">
-							{{ utils.display_actor_inline(item.meta.actor, size=50) }}
+							<div class="note notepad">
+								{{ utils.display_actor_inline(item.meta.actor, size=50) }}
+							</div>
 						</div>
 					{% else %}
 					{% endif %}
