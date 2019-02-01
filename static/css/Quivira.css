@@ -1,7 +1,126 @@
 @font-face {
-    font-family: 'Quivira';
-    src: local('Quivira'),
-         url('/static/fonts/Quivira.woff2') format('woff2');
-    font-weight: normal;
-    font-style: normal;
+  font-family: 'Quivira';
+  src: local('Quivira'),
+       url('/static/fonts/Quivira/Quivira-2200-22FF.woff2') format('woff2'),
+       url('/static/fonts/Quivira/Quivira-2200-22FF.woff') format('woff');
+  unicode-range: U+2200-22FF;
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Quivira';
+  src: local('Quivira'),
+       url('/static/fonts/Quivira/Quivira-2A00-2AFF.woff2') format('woff2'),
+       url('/static/fonts/Quivira/Quivira-2A00-2AFF.woff') format('woff');
+  unicode-range: U+2A00-2AFF;
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Quivira';
+  src: local('Quivira'),
+       url('/static/fonts/Quivira/Quivira-1D400-1D7FF.woff2') format('woff2'),
+       url('/static/fonts/Quivira/Quivira-1D400-1D7FF.woff') format('woff');
+  unicode-range: U+1D400-1D7FF;
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Quivira';
+  src: local('Quivira'),
+       url('/static/fonts/Quivira/Quivira-2100-214F.woff2') format('woff2'),
+       url('/static/fonts/Quivira/Quivira-2100-214F.woff') format('woff');
+  unicode-range: U+2100-214F;
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Quivira';
+  src: local('Quivira'),
+       url('/static/fonts/Quivira/Quivira-27C0-27EF.woff2') format('woff2'),
+       url('/static/fonts/Quivira/Quivira-27C0-27EF.woff') format('woff');
+  unicode-range: U+27C0-27EF;
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Quivira';
+  src: local('Quivira'),
+       url('/static/fonts/Quivira/Quivira-2980-29FF.woff2') format('woff2'),
+       url('/static/fonts/Quivira/Quivira-2980-29FF.woff') format('woff');
+  unicode-range: U+2980-29FF;
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Quivira';
+  src: local('Quivira'),
+       url('/static/fonts/Quivira/Quivira-2300-23FF.woff2') format('woff2'),
+       url('/static/fonts/Quivira/Quivira-2300-23FF.woff') format('woff');
+  unicode-range: U+2300-23FF;
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Quivira';
+  src: local('Quivira'),
+       url('/static/fonts/Quivira/Quivira-25A0-25FF.woff2') format('woff2'),
+       url('/static/fonts/Quivira/Quivira-25A0-25FF.woff') format('woff');
+  unicode-range: U+25A0-25FF;
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Quivira';
+  src: local('Quivira'),
+       url('/static/fonts/Quivira/Quivira-2B00-2BFF.woff2') format('woff2'),
+       url('/static/fonts/Quivira/Quivira-2B00-2BFF.woff') format('woff');
+  unicode-range: U+2B00-2BFF;
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Quivira';
+  src: local('Quivira'),
+       url('/static/fonts/Quivira/Quivira-2190-21FF.woff2') format('woff2'),
+       url('/static/fonts/Quivira/Quivira-2190-21FF.woff') format('woff');
+  unicode-range: U+2190-21FF;
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Quivira';
+  src: local('Quivira'),
+       url('/static/fonts/Quivira/Quivira-27F0-27FF.woff2') format('woff2'),
+       url('/static/fonts/Quivira/Quivira-27F0-27FF.woff') format('woff');
+  unicode-range: U+27F0-27FF;
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Quivira';
+  src: local('Quivira'),
+       url('/static/fonts/Quivira/Quivira-2900-297F.woff2') format('woff2'),
+       url('/static/fonts/Quivira/Quivira-2900-297F.woff') format('woff');
+  unicode-range: U+2900-297F;
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Quivira';
+  src: local('Quivira'),
+       url('/static/fonts/Quivira/Quivira-20D0-20F0.woff2') format('woff2'),
+       url('/static/fonts/Quivira/Quivira-20D0-20F0.woff') format('woff');
+  unicode-range: U+20D0-20F0;
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Quivira';
+  src: local('Quivira'),
+       url('/static/fonts/Quivira/Quivira-1EE00-1EEFF.woff2') format('woff2'),
+       url('/static/fonts/Quivira/Quivira-1EE00-1EEFF.woff') format('woff');
+  unicode-range: U+1EE00-1EEFF;
+  font-weight: normal;
+  font-style: normal;
 }
