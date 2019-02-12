@@ -1,4 +1,4 @@
-FROM quay.io/bashell/alpine-python:arm64
+FROM quay.io/bashell/alpine-python:3
 
 RUN apk add ca-certificates openssl libxml2 libxslt libstdc++ git make \
             libjpeg-turbo openjpeg tiff lcms2 freetype libwebp 
