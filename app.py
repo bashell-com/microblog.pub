@@ -191,6 +191,10 @@ def handle_activitypub_error(error):
     response.status_code = error.status_code
     return response
 
+@app.errorhandler(500)
+def handle_500(e):
+    return render_template('500.html'), 500
+
 # @app.errorhandler(Exception)
 # def handle_other_error(error):
 #    logger.error(
