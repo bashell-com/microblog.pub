@@ -1,13 +1,15 @@
 import logging
-import opengraph
-import requests
+
 from bs4 import BeautifulSoup
 from little_boxes import activitypub as ap
 from little_boxes.errors import NotAnActivityError
 from little_boxes.urlutils import check_url
 from little_boxes.urlutils import is_url_valid
+import opengraph
+import requests
 
 from .lookup import lookup
+
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +22,7 @@ def links_from_note(note):
             tags_href.add(h)
 
     links = set()
-    soup = BeautifulSoup(note["content"])
+    soup = BeautifulSoup(note["content"], 'html5lib')
     for link in soup.find_all("a"):
         h = link.get("href")
         if h.startswith("http") and h not in tags_href and is_url_valid(h):
