@@ -53,7 +53,9 @@ def fetch_og_metadata(user_agent, links):
         r.encoding = 'UTF-8'
         html = r.text
         try:
-            data = dict(opengraph.OpenGraph(html=html))
+            data = dict(opengraph.OpenGraph(
+                html=BeautifulSoup(html, 'html5lib')
+            ))
         except Exception:
             logger.exception(f"failed to parse {l}")
             continue
