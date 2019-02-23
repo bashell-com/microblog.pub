@@ -102,13 +102,21 @@ USER_AGENT = (
     f"{requests.utils.default_user_agent()} (microblog.pub/{VERSION}; +{BASE_URL})"
 )
 
-mongo_client = MongoClient(
-    host=[os.getenv("MICROBLOGPUB_MONGODB_HOST", "localhost:27017")]
-)
+
+def create_mongo_client():
+    return MongoClient(
+        host=[os.getenv("MICROBLOGPUB_MONGODB_HOST", "localhost:27017")],
+        connect=False,
+    )
+
+
+def create_db_client(db_name):
+    return create_mongo_client()[db_name]
+
 
 DB_NAME = "{}_{}".format(USERNAME, DOMAIN.replace(".", "_"))
-DB = mongo_client[DB_NAME]
-GRIDFS = mongo_client[f"{DB_NAME}_gridfs"]
+DB = create_db_client(DB_NAME)
+GRIDFS = create_db_client(f"{DB_NAME}_gridfs")
 MEDIA_CACHE = MediaCache(GRIDFS, USER_AGENT)
 
 
@@ -156,7 +164,7 @@ def _drop_db():
     if not DEBUG_MODE:
         return
 
-    mongo_client.drop_database(DB_NAME)
+    create_mongo_client().drop_database(DB_NAME)
 
 
 KEY = get_key(ID, USERNAME, DOMAIN)

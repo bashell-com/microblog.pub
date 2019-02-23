@@ -21,12 +21,14 @@ from little_boxes.errors import Error
 from little_boxes.errors import NotAnActivityError
 
 from config import BASE_URL
-from config import DB
+from config import DB_NAME
 from config import EXTRA_INBOXES
 from config import ID
 from config import ME
 from config import USERNAME
 from config import USER_AGENT
+from config import create_db_client
+
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +83,17 @@ class Box(Enum):
 class MicroblogPubBackend(Backend):
     """Implements a Little Boxes backend, backed by MongoDB."""
 
+    def __init__(self, *args, **kwargs):
+        super(MicroblogPubBackend, self).__init__(*args, **kwargs)
+        self.DB = create_db_client(DB_NAME)
+
+    def __del__(self):
+        self.close_db()
+        del(self.DB)
+
+    def close_db(self):
+        self.DB.client.close()
+
     def debug_mode(self) -> bool:
         return strtobool(os.getenv("MICROBLOGPUB_DEBUG", "false"))
 
@@ -105,7 +118,7 @@ class MicroblogPubBackend(Backend):
 
     def save(self, box: Box, activity: ap.BaseActivity) -> None:
         """Custom helper for saving an activity to the DB."""
-        DB.activities.insert_one(
+        self.DB.activities.insert_one(
             {
                 "box": box.value,
                 "activity": activity.to_dict(),
@@ -121,7 +134,7 @@ class MicroblogPubBackend(Backend):
             "type": ap.ActivityType.FOLLOW.value,
             "meta.undo": False,
         }
-        return [doc["activity"]["actor"] for doc in DB.activities.find(q)]
+        return [doc["activity"]["actor"] for doc in self.DB.activities.find(q)]
 
     def followers_as_recipients(self) -> List[str]:
         q = {
@@ -130,7 +143,7 @@ class MicroblogPubBackend(Backend):
             "meta.undo": False,
         }
         recipients = []
-        for doc in DB.activities.find(q):
+        for doc in self.DB.activities.find(q):
             recipients.append(
                 doc["meta"]["actor"]["sharedInbox"] or doc["meta"]["actor"]["inbox"]
             )
@@ -143,7 +156,7 @@ class MicroblogPubBackend(Backend):
             "type": ap.ActivityType.FOLLOW.value,
             "meta.undo": False,
         }
-        return [doc["activity"]["object"] for doc in DB.activities.find(q)]
+        return [doc["activity"]["object"] for doc in self.DB.activities.find(q)]
 
     def parse_collection(
         self, payload: Optional[Dict[str, Any]]=None, url: Optional[str]=None
@@ -160,7 +173,7 @@ class MicroblogPubBackend(Backend):
     @ensure_it_is_me
     def outbox_is_blocked(self, as_actor: ap.Person, actor_id: str) -> bool:
         return bool(
-            DB.activities.find_one(
+            self.DB.activities.find_one(
                 {
                     "box": Box.OUTBOX.value,
                     "type": ap.ActivityType.BLOCK.value,
@@ -180,7 +193,7 @@ class MicroblogPubBackend(Backend):
             if iri.endswith("/activity"):
                 iri = iri.replace("/activity", "")
                 is_a_note = True
-            data = DB.activities.find_one({"box": Box.OUTBOX.value, "remote_id": iri})
+            data = self.DB.activities.find_one({"box": Box.OUTBOX.value, "remote_id": iri})
             if data and data["meta"]["deleted"]:
                 raise ActivityGoneError(f"{iri} is gone")
             if data and is_a_note:
@@ -189,7 +202,7 @@ class MicroblogPubBackend(Backend):
                 return data["activity"]
         else:
             # Check if the activity is stored in the inbox
-            data = DB.activities.find_one({"remote_id": iri})
+            data = self.DB.activities.find_one({"remote_id": iri})
             if data:
                 if data["meta"]["deleted"]:
                     raise ActivityGoneError(f"{iri} is gone")
@@ -207,7 +220,7 @@ class MicroblogPubBackend(Backend):
             logger.info(f"{iri} found in cache")
             return ACTORS_CACHE[iri]
 
-        # data = DB.actors.find_one({"remote_id": iri})
+        # data = self.DB.actors.find_one({"remote_id": iri})
         # if data:
         #    if ap._has_type(data["type"], ap.ACTOR_TYPES):
         #        logger.info(f"{iri} found in DB cache")
@@ -219,7 +232,7 @@ class MicroblogPubBackend(Backend):
         if ap._has_type(data["type"], ap.ACTOR_TYPES):
             logger.debug(f"caching actor {iri}")
             # Cache the actor
-            DB.actors.update_one(
+            self.DB.actors.update_one(
                 {"remote_id": iri},
                 {"$set": {"remote_id": iri, "data": data}},
                 upsert=True,
@@ -230,20 +243,22 @@ class MicroblogPubBackend(Backend):
 
     @ensure_it_is_me
     def inbox_check_duplicate(self, as_actor: ap.Person, iri: str) -> bool:
-        return bool(DB.activities.find_one({"box": Box.INBOX.value, "remote_id": iri}))
+        return bool(self.DB.activities.find_one(
+            {"box": Box.INBOX.value, "remote_id": iri}
+        ))
 
     def set_post_to_remote_inbox(self, cb):
         self.post_to_remote_inbox_cb = cb
 
     @ensure_it_is_me
     def undo_new_follower(self, as_actor: ap.Person, follow: ap.Follow) -> None:
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"remote_id": follow.id}, {"$set": {"meta.undo": True}}
         )
 
     @ensure_it_is_me
     def undo_new_following(self, as_actor: ap.Person, follow: ap.Follow) -> None:
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"remote_id": follow.id}, {"$set": {"meta.undo": True}}
         )
 
@@ -251,7 +266,7 @@ class MicroblogPubBackend(Backend):
     def inbox_like(self, as_actor: ap.Person, like: ap.Like) -> None:
         obj = like.get_object()
         # Update the meta counter if the object is published by the server
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"box": Box.OUTBOX.value, "activity.object.id": obj.id},
             {"$inc": {"meta.count_like": 1}},
         )
@@ -260,16 +275,16 @@ class MicroblogPubBackend(Backend):
     def inbox_undo_like(self, as_actor: ap.Person, like: ap.Like) -> None:
         obj = like.get_object()
         # Update the meta counter if the object is published by the server
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"box": Box.OUTBOX.value, "activity.object.id": obj.id},
             {"$inc": {"meta.count_like":-1}},
         )
-        DB.activities.update_one({"remote_id": like.id}, {"$set": {"meta.undo": True}})
+        self.DB.activities.update_one({"remote_id": like.id}, {"$set": {"meta.undo": True}})
 
     @ensure_it_is_me
     def outbox_like(self, as_actor: ap.Person, like: ap.Like) -> None:
         obj = like.get_object()
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"activity.object.id": obj.id},
             {"$inc": {"meta.count_like": 1}, "$set": {"meta.liked": like.id}},
         )
@@ -277,11 +292,11 @@ class MicroblogPubBackend(Backend):
     @ensure_it_is_me
     def outbox_undo_like(self, as_actor: ap.Person, like: ap.Like) -> None:
         obj = like.get_object()
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"activity.object.id": obj.id},
             {"$inc": {"meta.count_like":-1}, "$set": {"meta.liked": False}},
         )
-        DB.activities.update_one({"remote_id": like.id}, {"$set": {"meta.undo": True}})
+        self.DB.activities.update_one({"remote_id": like.id}, {"$set": {"meta.undo": True}})
 
     @ensure_it_is_me
     def inbox_announce(self, as_actor: ap.Person, announce: ap.Announce) -> None:
@@ -295,7 +310,7 @@ class MicroblogPubBackend(Backend):
             )
             return
 
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"remote_id": announce.id},
             {
                 "$set": {
@@ -304,7 +319,7 @@ class MicroblogPubBackend(Backend):
                 }
             },
         )
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"activity.object.id": obj.id}, {"$inc": {"meta.count_boost": 1}}
         )
 
@@ -312,17 +327,17 @@ class MicroblogPubBackend(Backend):
     def inbox_undo_announce(self, as_actor: ap.Person, announce: ap.Announce) -> None:
         obj = announce.get_object()
         # Update the meta counter if the object is published by the server
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"activity.object.id": obj.id}, {"$inc": {"meta.count_boost":-1}}
         )
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"remote_id": announce.id}, {"$set": {"meta.undo": True}}
         )
 
     @ensure_it_is_me
     def outbox_announce(self, as_actor: ap.Person, announce: ap.Announce) -> None:
         obj = announce.get_object()
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"remote_id": announce.id},
             {
                 "$set": {
@@ -332,17 +347,17 @@ class MicroblogPubBackend(Backend):
             },
         )
 
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"activity.object.id": obj.id}, {"$set": {"meta.boosted": announce.id}}
         )
 
     @ensure_it_is_me
     def outbox_undo_announce(self, as_actor: ap.Person, announce: ap.Announce) -> None:
         obj = announce.get_object()
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"activity.object.id": obj.id}, {"$set": {"meta.boosted": False}}
         )
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"remote_id": announce.id}, {"$set": {"meta.undo": True}}
         )
 
@@ -350,14 +365,14 @@ class MicroblogPubBackend(Backend):
     def inbox_delete(self, as_actor: ap.Person, delete: ap.Delete) -> None:
         obj = delete.get_object()
         logger.debug("delete object={obj!r}")
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"activity.object.id": obj.id}, {"$set": {"meta.deleted": True}}
         )
 
         logger.info(f"inbox_delete handle_replies obj={obj!r}")
         in_reply_to = obj.inReplyTo
         if delete.get_object().ACTIVITY_TYPE != ap.ActivityType.NOTE:
-            in_reply_to = DB.activities.find_one(
+            in_reply_to = self.DB.activities.find_one(
                 {
                     "activity.object.id": delete.get_object().id,
                     "type": ap.ActivityType.CREATE.value,
@@ -365,7 +380,7 @@ class MicroblogPubBackend(Backend):
             )["activity"]["object"].get("inReplyTo")
 
         # Fake a Undo so any related Like/Announce doesn't appear on the web UI
-        DB.activities.update(
+        self.DB.activities.update(
             {"meta.object.id": obj.id},
             {"$set": {"meta.undo": True, "meta.extra": "object deleted"}},
         )
@@ -374,14 +389,14 @@ class MicroblogPubBackend(Backend):
 
     @ensure_it_is_me
     def outbox_delete(self, as_actor: ap.Person, delete: ap.Delete) -> None:
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"activity.object.id": delete.get_object().id},
             {"$set": {"meta.deleted": True}},
         )
         obj = delete.get_object()
         if delete.get_object().ACTIVITY_TYPE != ap.ActivityType.NOTE:
             obj = ap.parse_activity(
-                DB.activities.find_one(
+                self.DB.activities.find_one(
                     {
                         "activity.object.id": delete.get_object().id,
                         "type": ap.ActivityType.CREATE.value,
@@ -389,7 +404,7 @@ class MicroblogPubBackend(Backend):
                 )["activity"]
             ).get_object()
 
-        DB.activities.update(
+        self.DB.activities.update(
             {"meta.object.id": obj.id},
             {"$set": {"meta.undo": True, "meta.exta": "object deleted"}},
         )
@@ -400,7 +415,7 @@ class MicroblogPubBackend(Backend):
     def inbox_update(self, as_actor: ap.Person, update: ap.Update) -> None:
         obj = update.get_object()
         if obj.ACTIVITY_TYPE == ap.ActivityType.NOTE:
-            DB.activities.update_one(
+            self.DB.activities.update_one(
                 {"activity.object.id": obj.id},
                 {"$set": {"activity.object": obj.to_dict()}},
             )
@@ -427,7 +442,7 @@ class MicroblogPubBackend(Backend):
             del (update["$unset"])
 
         logger.info(f"updating note from outbox {obj!r} {update}")
-        DB.activities.update_one({"activity.object.id": obj["id"]}, update)
+        self.DB.activities.update_one({"activity.object.id": obj["id"]}, update)
         # FIXME(tsileo): should send an Update (but not a partial one, to all the note's recipients
         # (create a new Update with the result of the update, and send it without saving it?)
 
@@ -446,7 +461,7 @@ class MicroblogPubBackend(Backend):
         if not in_reply_to:
             pass
 
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"activity.object.id": in_reply_to},
             {"$inc": {"meta.count_reply":-1, "meta.count_direct_reply":-1}},
         )
@@ -463,7 +478,7 @@ class MicroblogPubBackend(Backend):
         root_reply = in_reply_to
         reply = ap.fetch_remote_activity(root_reply)
 
-        creply = DB.activities.find_one_and_update(
+        creply = self.DB.activities.find_one_and_update(
             {"activity.object.id": in_reply_to},
             {"$inc": {"meta.count_reply": 1, "meta.count_direct_reply": 1}},
         )
@@ -479,14 +494,14 @@ class MicroblogPubBackend(Backend):
             root_reply = in_reply_to
             reply = ap.fetch_remote_activity(root_reply)
             q = {"activity.object.id": root_reply}
-            if not DB.activities.count(q):
+            if not self.DB.activities.count(q):
                 self.save(Box.REPLIES, reply)
                 new_threads.append(reply.id)
 
-        DB.activities.update_one(
+        self.DB.activities.update_one(
             {"remote_id": create.id}, {"$set": {"meta.thread_root_parent": root_reply}}
         )
-        DB.activities.update(
+        self.DB.activities.update(
             {"box": Box.REPLIES.value, "remote_id": {"$in": new_threads}},
             {"$set": {"meta.thread_root_parent": root_reply}},
         )
@@ -520,22 +535,27 @@ def gen_feed():
     fg.description(f"{USERNAME} notes")
     fg.logo(ME.get("icon", {}).get("url"))
     fg.language("en")
+    DB = create_db_client(DB_NAME)
     for item in DB.activities.find(
-        {"box": Box.OUTBOX.value, "type": "Create", "meta.deleted": False}, limit=10
+        {"box": Box.OUTBOX.value, "type": "Create", "meta.deleted": False},
+        limit=10
     ).sort("_id", -1):
         fe = fg.add_entry()
         fe.id(item["activity"]["object"].get("url"))
         fe.link(href=item["activity"]["object"].get("url"))
         fe.title(item["activity"]["object"]["content"])
         fe.description(item["activity"]["object"]["content"])
+    DB.client.close()
     return fg
 
 
 def json_feed(path: str) -> Dict[str, Any]:
     """JSON Feed (https://jsonfeed.org/) document."""
     data = []
+    DB = create_db_client(DB_NAME)
     for item in DB.activities.find(
-        {"box": Box.OUTBOX.value, "type": "Create", "meta.deleted": False}, limit=10
+        {"box": Box.OUTBOX.value, "type": "Create", "meta.deleted": False},
+        limit=10
     ).sort("_id", -1):
         data.append(
             {
@@ -546,6 +566,7 @@ def json_feed(path: str) -> Dict[str, Any]:
                 "date_published": item["activity"]["object"].get("published"),
             }
         )
+    DB.client.close()
     return {
         "version": "https://jsonfeed.org/version/1",
         "user_comment": (
@@ -580,6 +601,7 @@ def build_inbox_json_feed(
     if request_cursor:
         q["_id"] = {"$lt": request_cursor}
 
+    DB = create_db_client(DB_NAME)
     for item in DB.activities.find(q, limit=50).sort("_id", -1):
         actor = ap.get_backend().fetch_iri(item["activity"]["actor"])
         data.append(
@@ -597,7 +619,7 @@ def build_inbox_json_feed(
             }
         )
         cursor = str(item["_id"])
-
+    DB.client.close()
     resp = {
         "version": "https://jsonfeed.org/version/1",
         "title": f"{USERNAME}'s stream",
