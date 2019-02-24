@@ -18,7 +18,7 @@ bcrypt
 mf2py
 passlib
 git+https://github.com/erikriver/opengraph.git
-git+https://github.com/tsileo/little-boxes.git
+git+https://github.com/bashell-com/little-boxes.git
 pyyaml
 pillow
 cachetools
@@ -27,4 +27,3 @@ emoji
 git+https://github.com/bashell-com/langdetect.git
 similar_text
 yandex-translater
-
