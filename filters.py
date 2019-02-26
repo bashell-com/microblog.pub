@@ -353,6 +353,7 @@ def translate(html):
                 current_app.logger.debug(f'cannot translate {detected_lang}→{TARGET_LANG} on yandex')
                 return html
             else:
+                translated_html = translated_html.replace(' < p > < / p > ','')
                 similar = similar_text(html, translated_html)
                 DB.translate.update_one(
                     {"hash": html_hash, "target_lang": TARGET_LANG},
