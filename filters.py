@@ -354,6 +354,7 @@ def translate(html):
                 return html
             else:
                 translated_html = translated_html.replace(' < p > < / p > ','')
+                translated_html = translated_html.replace(' < br > ','')
                 similar = similar_text(html, translated_html)
                 DB.translate.update_one(
                     {"hash": html_hash, "target_lang": TARGET_LANG},
