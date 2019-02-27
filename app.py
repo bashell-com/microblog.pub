@@ -93,6 +93,9 @@ else:
     root_logger.handlers = gunicorn_logger.handlers
     root_logger.setLevel(gunicorn_logger.level)
 
+if (logger.level > logging.DEBUG) and (root_logger.level > logging.DEBUG):
+    app.jinja_env.add_extension('jinja2htmlcompress.HTMLCompress')
+
 SIG_AUTH = HTTPSigAuth(KEY)
 
 
