@@ -1,6 +1,7 @@
 python-dateutil
 libsass
-git+https://github.com/mher/flower.git
+tornado<6.0.0
+flower
 gunicorn
 piexif
 requests
