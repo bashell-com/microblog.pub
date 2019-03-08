@@ -4,3 +4,6 @@ icon_url: 'https://you-avatar-url'
 domain: 'your-domain.tld'
 summary: 'your summary'
 https: true
+image_max_size:
+  width: 1920
+  height: 1920

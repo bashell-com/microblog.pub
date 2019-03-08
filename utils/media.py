@@ -1,25 +1,44 @@
 import base64
-import mimetypes
 from enum import Enum
 from gzip import GzipFile
 from io import BytesIO
+import mimetypes
 from typing import Any
 
+from PIL import Image
 import gridfs
 import piexif
 import requests
-from PIL import Image
 
 
 def load(url, user_agent):
     """Initializes a `PIL.Image` from the URL."""
-    with requests.get(url, stream=True, headers={"User-Agent": user_agent}) as resp:
+    with requests.get(url, stream=True,
+                      headers={"User-Agent": user_agent}) as resp:
         resp.raise_for_status()
         if not resp.headers.get('content-type').startswith('image/'):
-            raise ValueError(f"bad content-type {resp.headers.get('content-type')}")
+            raise ValueError(
+                f"bad content-type {resp.headers.get('content-type')}"
+            )
 
         resp.raw.decode_content = True
         return Image.open(BytesIO(resp.raw.read()))
+
+
+def info(img):
+    """Returns image info dictionary to be used with `PIL.Image.save()`"""
+    if not isinstance(img, Image.Image):
+        raise TypeError('`img` must be an instance of `PIL.Image.Image`')
+
+    INFO_KEYS = ['duration',
+                 'gamma',
+                 'icc_profile',
+                 'interlace',
+                 'loop',
+                 'transparency']
+    return dict(
+        [(key, img.info.get(key)) for key in INFO_KEYS if key in img.info]
+    )
 
 
 def to_data_uri(img):
@@ -50,7 +69,8 @@ class MediaCache(object):
         i.thumbnail((100, 100))
         with BytesIO() as buf:
             with GzipFile(mode="wb", fileobj=buf) as f1:
-                i.save(f1, format=i.format)
+                i.save(f1, format=i.format,
+                       optimize=True, progressive=True, **info(i))
             buf.seek(0)
             self.fs.put(
                 buf,
@@ -73,7 +93,8 @@ class MediaCache(object):
             # Save the original attachment (gzipped)
             with BytesIO() as buf:
                 f1 = GzipFile(mode="wb", fileobj=buf)
-                i.save(f1, format=i.format)
+                i.save(f1, format=i.format,
+                       optimize=True, progressive=True, **info(i))
                 f1.close()
                 buf.seek(0)
                 self.fs.put(
@@ -87,7 +108,8 @@ class MediaCache(object):
             i.thumbnail((720, 720))
             with BytesIO() as buf:
                 with GzipFile(mode="wb", fileobj=buf) as f1:
-                    i.save(f1, format=i.format)
+                    i.save(f1, format=i.format,
+                           optimize=True, progressive=True, **info(i))
                 buf.seek(0)
                 self.fs.put(
                     buf,
@@ -126,7 +148,8 @@ class MediaCache(object):
             t1.thumbnail((size, size))
             with BytesIO() as buf:
                 with GzipFile(mode="wb", fileobj=buf) as f1:
-                    t1.save(f1, format=i.format)
+                    t1.save(f1, format=i.format,
+                            optimize=True, progressive=True, **info(i))
                 buf.seek(0)
                 self.fs.put(
                     buf,
@@ -136,20 +159,28 @@ class MediaCache(object):
                     kind=Kind.ACTOR_ICON.value,
                 )
 
-    def save_upload(self, obuf: BytesIO, filename: str) -> str:
+    def save_upload(self, obuf: BytesIO, filename: str, max_size: tuple) -> str:
         # Remove EXIF metadata
-        if filename.lower().endswith(".jpg") or filename.lower().endswith(".jpeg"):
+        if filename.lower().endswith(".jpg") \
+        or filename.lower().endswith(".jpeg"):
             obuf.seek(0)
             with BytesIO() as buf2:
                 piexif.remove(obuf.getvalue(), buf2)
                 obuf.truncate(0)
                 obuf.write(buf2.getvalue())
 
-        obuf.seek(0)
         mtype = mimetypes.guess_type(filename)[0]
+        thumbnail_buf = BytesIO()
+        if mtype and mtype.startswith('image'):
+            i = Image.open(obuf, 'r')
+            if (i.width > max_size[0]) or (i.height > max_size[1]):
+                i.thumbnail(size=max_size)
+                i.save(thumbnail_buf, format=i.format,
+                       optimize=True, progressive=True, **info(i))
+        obuf.seek(0)
         with BytesIO() as gbuf:
             with GzipFile(mode="wb", fileobj=gbuf) as gzipfile:
-                gzipfile.write(obuf.getvalue())
+                gzipfile.write(thumbnail_buf.getvalue() or obuf.getvalue())
 
             gbuf.seek(0)
             oid = self.fs.put(

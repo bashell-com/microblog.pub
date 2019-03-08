@@ -42,15 +42,20 @@ try:
 except ModuleNotFoundError:
     custom_cache_purge_hook = noop
 
-if os.path.isdir('.git'):
-    VERSION = (
-        subprocess.check_output(["git", "describe", "--always"]).split()[0].decode("utf-8")
-    )
-elif os.path.isdir('.hg'):
-    VERSION = (
-        subprocess.check_output(["hg", "id", "-i"]).split()[0].decode("utf-8")
-    )
-else:
+try:
+    if os.path.isdir('.git'):
+        VERSION = (
+            subprocess.check_output(
+                ["git", "describe", "--always"]
+            ).split()[0].decode("utf-8")
+        )
+    elif os.path.isdir('.hg'):
+        VERSION = (
+            subprocess.check_output(
+                ["hg", "id", "-i"]
+            ).split()[0].decode("utf-8")
+        )
+except:
     VERSION = "-"
 
 DEBUG_MODE = strtobool(os.getenv("MICROBLOGPUB_DEBUG", "false"))
@@ -88,6 +93,10 @@ with open(os.path.join(KEY_DIR, "me.yml")) as f:
     NO_TRANSLATE = conf.get("no_translate", [])
     TARGET_LANG = conf.get("target_lang", "en")
     SIMILARITY_THRESHOLD = conf.get("similarity_threshold", 94)
+    IMAGE_MAX_SIZE = (
+        conf.get("image_max_size", {}).get("width", 1920),
+        conf.get("image_max_size", {}).get("height", 1920)
+    )
 
 SASS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sass")
 theme_css = f"$primary-color: {THEME_COLOR};\n"

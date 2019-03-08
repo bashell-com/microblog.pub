@@ -29,6 +29,7 @@ from config import CDN_URL
 from config import DB
 from config import DEBUG_MODE
 from config import ID
+from config import IMAGE_MAX_SIZE
 from config import JWT
 from config import ME
 from config import MEDIA_CACHE
@@ -281,7 +282,7 @@ def api_new_note():
         rfilename = secure_filename(file.filename)
         with BytesIO() as buf:
             file.save(buf)
-            oid = MEDIA_CACHE.save_upload(buf, rfilename)
+            oid = MEDIA_CACHE.save_upload(buf, rfilename, IMAGE_MAX_SIZE)
         mtype = mimetypes.guess_type(rfilename)[0]
         url = f"{BASE_URL}/uploads/{oid}/{rfilename}"
         if CDN_URL:
