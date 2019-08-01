@@ -1,5 +1,6 @@
 @font-face {
   font-family: 'BlobMoji';
+  font-display: swap;
   src: local("Blobmoji"),
        url('/static/fonts/BlobMoji/BlobMoji-0000-329f.woff') format('woff');
        unicode-range: U+0000-329f;
@@ -8,6 +9,7 @@
 }
 @font-face {
   font-family: 'BlobMoji';
+  font-display: swap;
   src: local("Blobmoji"),
        url('/static/fonts/BlobMoji/BlobMoji-1f000-1f0ff.woff') format('woff');
        unicode-range: U+1f000-1f0ff;
@@ -16,6 +18,7 @@
 }
 @font-face {
   font-family: 'BlobMoji';
+  font-display: swap;
   src: local("Blobmoji"),
        url('/static/fonts/BlobMoji/BlobMoji-1f100-1f1ff.woff') format('woff');
        unicode-range: U+1f100-1f1ff;
@@ -24,6 +27,7 @@
 }
 @font-face {
   font-family: 'BlobMoji';
+  font-display: swap;
   src: local("Blobmoji"),
        url('/static/fonts/BlobMoji/BlobMoji-1f200-1f2ff.woff') format('woff');
        unicode-range: U+1f200-1f2ff;
@@ -32,6 +36,7 @@
 }
 @font-face {
   font-family: 'BlobMoji';
+  font-display: swap;
   src: local("Blobmoji"),
        url('/static/fonts/BlobMoji/BlobMoji-1f300-1f3ff.woff') format('woff');
        unicode-range: U+1f300-1f3ff;
@@ -40,6 +45,7 @@
 }
 @font-face {
   font-family: 'BlobMoji';
+  font-display: swap;
   src: local("Blobmoji"),
        url('/static/fonts/BlobMoji/BlobMoji-1f400-1f4ff.woff') format('woff');
        unicode-range: U+1f400-1f4ff;
@@ -48,6 +54,7 @@
 }
 @font-face {
   font-family: 'BlobMoji';
+  font-display: swap;
   src: local("Blobmoji"),
        url('/static/fonts/BlobMoji/BlobMoji-1f500-1f5ff.woff') format('woff');
        unicode-range: U+1f500-1f5ff;
@@ -56,6 +63,7 @@
 }
 @font-face {
   font-family: 'BlobMoji';
+  font-display: swap;
   src: local("Blobmoji"),
        url('/static/fonts/BlobMoji/BlobMoji-1f600-1f6ff.woff') format('woff');
        unicode-range: U+1f600-1f6ff;
@@ -64,6 +72,7 @@
 }
 @font-face {
   font-family: 'BlobMoji';
+  font-display: swap;
   src: local("Blobmoji"),
        url('/static/fonts/BlobMoji/BlobMoji-1f900-1f9ff.woff') format('woff');
        unicode-range: U+1f900-1f9ff;
@@ -72,6 +81,7 @@
 }
 @font-face {
   font-family: 'BlobMoji';
+  font-display: swap;
   src: local("Blobmoji"),
        url('/static/fonts/BlobMoji/BlobMoji-e0000-fffff.woff') format('woff');
        unicode-range: U+e0000-fffff;

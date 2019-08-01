@@ -1,5 +1,6 @@
 @font-face {
     font-family: 'FreeSerif';
+    font-display: swap;
     src: local('FreeSerif'),
          url('/static/fonts/FreeSerif.woff2') format('woff2');
     font-weight: normal;

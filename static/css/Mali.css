@@ -1,6 +1,7 @@
 /* thai */
 @font-face {
   font-family: 'Mali';
+  font-display: swap;
   font-style: normal;
   font-weight: 400;
   src: local('Mali Regular'), local('Mali-Regular'), url(/static/fonts/Mali/N0ba2SRONuN4SDnED2xx.woff2) format('woff2');
@@ -9,6 +10,7 @@
 /* vietnamese */
 @font-face {
   font-family: 'Mali';
+  font-display: swap;
   font-style: normal;
   font-weight: 400;
   src: local('Mali Regular'), local('Mali-Regular'), url(/static/fonts/Mali/N0ba2SRONuN4SCLED2xx.woff2) format('woff2');
@@ -17,6 +19,7 @@
 /* latin-ext */
 @font-face {
   font-family: 'Mali';
+  font-display: swap;
   font-style: normal;
   font-weight: 400;
   src: local('Mali Regular'), local('Mali-Regular'), url(/static/fonts/Mali/N0ba2SRONuN4SCPED2xx.woff2) format('woff2');
@@ -25,6 +28,7 @@
 /* latin */
 @font-face {
   font-family: 'Mali';
+  font-display: swap;
   font-style: normal;
   font-weight: 400;
   src: local('Mali Regular'), local('Mali-Regular'), url(/static/fonts/Mali/N0ba2SRONuN4SC3EDw.woff2) format('woff2');

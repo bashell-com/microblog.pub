@@ -13,11 +13,11 @@
 	<meta name="msapplication-TileImage" content="{{ config.CDN_URL }}/static/pwa/icon-144.png">
 	<meta name="msapplication-TileColor" content="#FAEBD7">
 	<link rel="shortcut icon" href="{{ config.CDN_URL }}/static/favicon.ico">
-	<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
-	<link rel="stylesheet" href="/static/css/Mali.css">
-	<link rel="stylesheet" href="/static/css/BlobMoji.css">
-	<link rel="stylesheet" href="/static/css/Quivira.css">
-	<link rel="stylesheet" href="{{ config.CDN_URL }}/static/css/notepad.css">
+	<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous" media="none">
+	<link rel="stylesheet" href="/static/css/Mali.css" media="none">
+	<link rel="stylesheet" href="/static/css/BlobMoji.css" media="none">
+	<link rel="stylesheet" href="/static/css/Quivira.css" media="none">
+	<link rel="stylesheet" href="{{ config.CDN_URL }}/static/css/notepad.css" media="none">
 	<link rel="authorization_endpoint" href="{{ config.ID }}/indieauth">
 	<link rel="token_endpoint" href="{{ config.ID }}/token">
 {% if not request.args.get("older_than") and not request.args.get("previous_than") %}
@@ -71,6 +71,11 @@
 			for bringing back the cute yellow blob. 😇
 		</div>
 	</div>
+	<link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous" media="all">
+	<link rel="stylesheet" href="/static/css/Mali.css" media="all">
+	<link rel="stylesheet" href="/static/css/BlobMoji.css" media="all">
+	<link rel="stylesheet" href="/static/css/Quivira.css" media="all">
+	<link rel="stylesheet" href="{{ config.CDN_URL }}/static/css/notepad.css" media="all">
 </body>
 </html>
 
