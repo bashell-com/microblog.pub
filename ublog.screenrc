@@ -1,0 +1,5 @@
+sessionname ublog
+chdir /home/cwt/Projects/microblog.pub
+screen -t ublog 0 ./ublog.sh
+screen -t celery 1 ./celery.sh
+
